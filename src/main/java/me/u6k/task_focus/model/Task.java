@@ -26,7 +26,10 @@ public class Task {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "edtimated_start_time", nullable = true)
+    @Column(name = "estimated_time", nullable = false)
+    private int estimatedTime;
+
+    @Column(name = "estimated_start_time", nullable = true)
     private Date estimatedStartTime;
 
     @Column(name = "start_time", nullable = true)
@@ -65,6 +68,14 @@ public class Task {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public int getEstimatedTime() {
+        return estimatedTime;
+    }
+
+    public void setEstimatedTime(int estimatedTime) {
+        this.estimatedTime = estimatedTime;
     }
 
     public Date getEstimatedStartTime() {
