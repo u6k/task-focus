@@ -174,7 +174,7 @@ public class TaskServiceTest {
 
             fail();
         } catch (IllegalArgumentException e) {
-            assertThat(e.getMessage(), is("date and estimatedStartTime are different day. date=Wed Dec 23 00:00:00 JST 2015, estimatedStartTime=Thu Dec 24 13:00:00 JST 2015"));
+            assertThat(e.getMessage(), is("date and estimatedStartTime are different day. date=Wed Dec 23 00:00:00 GMT 2015, estimatedStartTime=Thu Dec 24 13:00:00 GMT 2015"));
         }
 
         Date estimatedStartTime = new SimpleDateFormat("yyyy-MM-dd HH:mm").parse("2015-12-23 14:27");
