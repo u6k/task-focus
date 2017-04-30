@@ -1,7 +1,7 @@
 FROM openjdk:8-alpine
 MAINTAINER u6k.apps@gmail.com
 
-VOLUME /opt
+RUN mkdir -p /opt
 WORKDIR /opt
 COPY target/task-focus-webapp.jar .
 
