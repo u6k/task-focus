@@ -1,0 +1,25 @@
+machine:
+    timezone: Asia/Tokyo
+    services:
+        - docker
+
+compile:
+    override:
+        - docker build -t task-focus-dev -f Dockerfile-dev .
+        - docker run --rm -v $(pwd):/var/my-app -v ~/.m2:/root/.m2 task-focus-dev mvn clean compile
+
+test:
+    override:
+        - docker run --rm -v $(pwd):/var/my-app -v ~/.m2:/root/.m2 task-focus-dev mvn package site:site site:jar
+        - docker build -t u6kapps/task-focus .
+    post:
+        - cp -r target/surefire-reports/* $CIRCLE_TEST_REPORTS/
+        - cp -r target/* $CIRCLE_ARTIFACTS/
+
+deployment:
+    release:
+        tag: /.+/
+        commands:
+            - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
+            - docker tag u6kapps/task-focus u6kapps/task-focus:$CIRCLE_TAG
+            - docker push u6kapps/task-focus
