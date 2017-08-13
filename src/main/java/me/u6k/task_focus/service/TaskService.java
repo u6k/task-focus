@@ -1,7 +1,9 @@
 
 package me.u6k.task_focus.service;
 
+import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import javax.transaction.Transactional;
@@ -21,6 +23,9 @@ public class TaskService {
     private TaskRepository taskRepo;
 
     public UUID create(Date date, String name, int estimatedTime, Date estimatedStartTime) {
+        /*
+         * 入力チェック
+         */
         if (date == null) {
             throw new IllegalArgumentException("date is null.");
         }
@@ -36,6 +41,9 @@ public class TaskService {
             }
         }
 
+        /*
+         * タスクを保存
+         */
         Task task = new Task();
         task.setId(UUID.randomUUID());
         task.setDate(date);
@@ -50,6 +58,33 @@ public class TaskService {
         this.taskRepo.save(task);
 
         return task.getId();
+    }
+
+    public List<Task> findByDate(Date date) {
+        /*
+         * 入力チェック
+         */
+        if (date == null) {
+            throw new IllegalArgumentException("date is null.");
+        }
+
+        /*
+         * タスクを検索
+         */
+        Date startDate = date;
+
+        Calendar endCalendar = Calendar.getInstance();
+        endCalendar.setTime(date);
+        endCalendar.set(Calendar.HOUR_OF_DAY, 0);
+        endCalendar.set(Calendar.MINUTE, 0);
+        endCalendar.set(Calendar.SECOND, 0);
+        endCalendar.set(Calendar.MILLISECOND, 0);
+        endCalendar.add(Calendar.MILLISECOND, -1);
+        Date endDate = endCalendar.getTime();
+
+        List<Task> taskList = this.taskRepo.findByDate(startDate, endDate);
+
+        return taskList;
     }
 
 }

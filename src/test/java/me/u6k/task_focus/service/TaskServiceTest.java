@@ -12,6 +12,7 @@ import java.util.UUID;
 import me.u6k.task_focus.model.Task;
 import me.u6k.task_focus.model.TaskRepository;
 import org.apache.commons.lang3.time.DateUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,8 +30,21 @@ public class TaskServiceTest {
     @Autowired
     private TaskRepository taskRepo;
 
+    private SimpleDateFormat formatter;
+
     @Before
-    public void setup() {
+    public void setup() throws Exception{
+        this.formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+
+        this.taskService.create(this.formatter.parse("2017-08-12 23:59:59.999"), "テスト作業0", 0, null);
+        this.taskService.create(this.formatter.parse("2017-08-13 00:00:00.000"), "テスト作業1", 0, null);
+        this.taskService.create(this.formatter.parse("2017-08-13 12:34:56.987"), "テスト作業2", 0, null);
+        this.taskService.create(this.formatter.parse("2017-08-13 23:59:59.999"), "テスト作業3", 0, null);
+        this.taskService.create(this.formatter.parse("2017-08-14 00:00:00.000"), "テスト作業4", 0, null);
+    }
+
+    @After
+    public void teardown(){
         this.taskRepo.deleteAllInBatch();
     }
 
@@ -38,7 +52,7 @@ public class TaskServiceTest {
     public void create() {
         List<Task> l = this.taskRepo.findAll();
 
-        assertThat(l.size(), is(0));
+        assertThat(l.size(), is(5));
 
         this.taskService.create(new Date(), "テスト作業1", 60, null);
         this.taskService.create(new Date(), "テスト作業2", 10, null);
@@ -46,7 +60,7 @@ public class TaskServiceTest {
 
         l = this.taskRepo.findAll();
 
-        assertThat(l.size(), is(3));
+        assertThat(l.size(), is(8));
     }
 
     @Test
@@ -61,7 +75,7 @@ public class TaskServiceTest {
 
     @Test
     public void create_作業名が空の場合はエラー() throws Exception {
-        Date date = new SimpleDateFormat("yyyy-MM-dd").parse("2015-12-23");
+        Date date = this.formatter.parse("2015-12-23 00:00:00.000");
 
         // nullはエラー
         try {
@@ -106,7 +120,7 @@ public class TaskServiceTest {
 
     @Test
     public void create_見積り時間がマイナスの場合はエラー() throws Exception {
-        Date date = new SimpleDateFormat("yyyy-MM-dd").parse("2015-12-23");
+        Date date = this.formatter.parse("2015-12-23 00:00:00.000");
 
         // マイナスはエラー
         try {
@@ -166,10 +180,10 @@ public class TaskServiceTest {
 
     @Test
     public void create_開始予定時刻と作業日が異なる場合はエラー() throws Exception {
-        Date date = new SimpleDateFormat("yyyy-MM-dd").parse("2015-12-23");
+        Date date = this.formatter.parse("2015-12-23 00:00:00.000");
 
         try {
-            Date estimatedStartTime = new SimpleDateFormat("yyyy-MM-dd HH:mm").parse("2015-12-24 13:00");
+            Date estimatedStartTime = this.formatter.parse("2015-12-24 13:00:00.000");
             this.taskService.create(date, "テスト作業", 0, estimatedStartTime);
 
             fail();
@@ -177,7 +191,7 @@ public class TaskServiceTest {
             assertThat(e.getMessage(), is("date and estimatedStartTime are different day. date=Wed Dec 23 00:00:00 GMT 2015, estimatedStartTime=Thu Dec 24 13:00:00 GMT 2015"));
         }
 
-        Date estimatedStartTime = new SimpleDateFormat("yyyy-MM-dd HH:mm").parse("2015-12-23 14:27");
+        Date estimatedStartTime = this.formatter.parse("2015-12-23 14:27:00.000");
         UUID id = this.taskService.create(date, "テスト作業", 0, estimatedStartTime);
         Task t = this.taskRepo.findOne(id);
         assertThat(t.getId(), is(id));
@@ -188,6 +202,39 @@ public class TaskServiceTest {
         assertTrue(DateUtils.isSameInstant(t.getEstimatedStartTime(), estimatedStartTime));
         assertNull(t.getStartTime());
         assertNull(t.getEndTime());
+    }
+
+    @Test
+    public void findByDate_0件() throws Exception{
+        this.taskService.create(this.formatter.parse("2017-08-12 23:59:59.999"), "テスト作業0", 0, null);
+        this.taskService.create(this.formatter.parse("2017-08-13 00:00:00.000"), "テスト作業1", 0, null);
+        this.taskService.create(this.formatter.parse("2017-08-13 12:34:56.987"), "テスト作業2", 0, null);
+        this.taskService.create(this.formatter.parse("2017-08-13 23:59:59.999"), "テスト作業3", 0, null);
+        this.taskService.create(this.formatter.parse("2017-08-14 00:00:00.000"), "テスト作業4", 0, null);
+
+        Date date = this.formatter.parse("2017-08-11 23:59:59.999");
+        List<Task> taskList = this.taskService.findByDate(date);
+
+        assertThat(taskList.size(), is(0));
+
+        date = this.formatter.parse("2017-08-15 00:00:00.000");
+        taskList=this.taskService.findByDate(date);
+
+        assertThat(taskList.size(), is(0));
+    }
+
+    @Test
+    public void findByDate_結果あり() throws Exception{
+        this.taskService.create(this.formatter.parse("2017-08-12 23:59:59.999"), "テスト作業0", 0, null);
+        this.taskService.create(this.formatter.parse("2017-08-13 00:00:00.000"), "テスト作業1", 0, null);
+        this.taskService.create(this.formatter.parse("2017-08-13 12:34:56.987"), "テスト作業2", 0, null);
+        this.taskService.create(this.formatter.parse("2017-08-13 23:59:59.999"), "テスト作業3", 0, null);
+        this.taskService.create(this.formatter.parse("2017-08-14 00:00:00.000"), "テスト作業4", 0, null);
+
+        Date date = this.formatter.parse("2017-08-12 00:00:00.000");
+        List<Task> taskList = this.taskService.findByDate(date);
+
+        assertThat(taskList.size(), is(1));
     }
 
 }
