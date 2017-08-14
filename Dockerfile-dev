@@ -6,10 +6,10 @@ RUN apk update && \
     apk add maven
 
 # Setup work directory
-RUN mkdir -p /var/my-app
+VOLUME /var/my-app
 WORKDIR /var/my-app
 
 # Setup docker run setting
 EXPOSE 8080
 
-CMD ["mvn", "clean", "package"]
+CMD ["mvn", "clean", "surefire-report:report", "package"]

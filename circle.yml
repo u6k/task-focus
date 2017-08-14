@@ -6,11 +6,10 @@ machine:
 compile:
     override:
         - docker build -t task-focus-dev -f Dockerfile-dev .
-        - docker run --rm -v $(pwd):/var/my-app -v ~/.m2:/root/.m2 task-focus-dev mvn clean compile
 
 test:
     override:
-        - docker run --rm -v $(pwd):/var/my-app -v ~/.m2:/root/.m2 task-focus-dev mvn package site:site site:jar
+        - docker run --rm -v "${PWD}:/var/my-app" -v "${HOME}/.m2:/root/.m2" task-focus-dev
         - docker build -t u6kapps/task-focus .
     post:
         - cp -r target/surefire-reports/* $CIRCLE_TEST_REPORTS/
