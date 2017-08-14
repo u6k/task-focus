@@ -21,7 +21,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class TaskServiceTest_findByDate {
+public class TaskService_findByDate_Test {
 
     @Autowired
     private TaskService taskService;
