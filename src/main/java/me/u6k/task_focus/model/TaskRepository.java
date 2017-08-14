@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface TaskRepository extends JpaRepository<Task, UUID> {
 
-    @Query("select t from Task t where t.date between :startDate and :endDate")
-    List<Task> findByDate(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
+    @Query("select t from Task t where t.date = :date")
+    List<Task> findByDate(@Param("date") Date date);
 
 }

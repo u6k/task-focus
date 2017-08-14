@@ -71,18 +71,9 @@ public class TaskService {
         /*
          * タスクを検索
          */
-        Date startDate = date;
+        date = DateUtil.datetimeToDate(date);
 
-        Calendar endCalendar = Calendar.getInstance();
-        endCalendar.setTime(date);
-        endCalendar.set(Calendar.HOUR_OF_DAY, 0);
-        endCalendar.set(Calendar.MINUTE, 0);
-        endCalendar.set(Calendar.SECOND, 0);
-        endCalendar.set(Calendar.MILLISECOND, 0);
-        endCalendar.add(Calendar.MILLISECOND, -1);
-        Date endDate = endCalendar.getTime();
-
-        List<Task> taskList = this.taskRepo.findByDate(startDate, endDate);
+        List<Task> taskList = this.taskRepo.findByDate(date);
 
         return taskList;
     }
