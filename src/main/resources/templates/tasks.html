@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"></meta>
+<meta http-equiv="X-UA-Compatible" content="IE=edge"></meta>
+<meta name="viewport" content="width=device-width, initial-scale=1"></meta>
+<title>Tasks | Task Focus</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"></link>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"></link>
+<style>
+body {
+    padding-top: 70px;
+}
+</style>
+</head>
+<body>
+    <nav th:replace="navigation :: nav"></nav>
+    <div class="container-fluid">
+        <h1 class="page-header">Tasks</h1>
+        <h2>作業日:</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>作業名</th>
+                    <th>開始予定時刻</th>
+                    <th>見積り時間(時間)</th>
+                    <th>開始時刻</th>
+                    <th>終了時刻</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="task : ${taskList}">
+                    <td><a href="/ui/tasks/xxxxx-xx-xx-xx-xxxx/edit" th:text="${task.name}" th:href="@{'/ui/tasks/'+${task.id}+'/edit'}">テスト作業1</a></td>
+                    <td th:text="${#dates.format(task.estimatedStartTime, 'HH:mm')}">13:00</td>
+                    <td th:text="${task.estimatedTime}">1.0</td>
+                    <td th:text="${#dates.format(task.startTime, 'HH:mm')}" th:if="${task.startTime}"></td>
+                    <td th:text="${#dates.format(task.endTime, 'HH:mm')}" th:if="${task.endTime}"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</body>
+</html>
