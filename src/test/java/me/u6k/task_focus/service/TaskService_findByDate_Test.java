@@ -11,7 +11,6 @@ import java.util.TimeZone;
 import me.u6k.task_focus.model.Task;
 import me.u6k.task_focus.model.TaskRepository;
 import me.u6k.task_focus.util.DateUtil;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,16 +32,13 @@ public class TaskService_findByDate_Test {
     public void setup() throws Exception {
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 
+        this.taskRepo.deleteAllInBatch();
+
         this.taskService.create(DateUtil.parseFullDatetime("2017-08-12 23:59:59.999"), "テスト作業0", 0, null);
         this.taskService.create(DateUtil.parseFullDatetime("2017-08-13 00:00:00.000"), "テスト作業1", 0, null);
         this.taskService.create(DateUtil.parseFullDatetime("2017-08-13 12:34:56.987"), "テスト作業2", 0, null);
         this.taskService.create(DateUtil.parseFullDatetime("2017-08-13 23:59:59.999"), "テスト作業3", 0, null);
         this.taskService.create(DateUtil.parseFullDatetime("2017-08-14 00:00:00.000"), "テスト作業4", 0, null);
-    }
-
-    @After
-    public void teardown() {
-        this.taskRepo.deleteAllInBatch();
     }
 
     @Test
@@ -77,7 +73,7 @@ public class TaskService_findByDate_Test {
 
     @Test
     public void findByDate_結果あり() throws Exception {
-        this.taskRepo.findAll().forEach(x->{
+        this.taskRepo.findAll().forEach(x -> {
             System.out.println(x);
         });
 
