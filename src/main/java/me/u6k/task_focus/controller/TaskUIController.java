@@ -70,7 +70,9 @@ public class TaskUIController {
         }
 
         try {
-            this.taskService.create(form.getDate(), form.getName(), form.getEstimatedTime(), form.getEstimatedStartTime());
+            Date estimatedStartTime = DateUtil.hourMinutesToDatetime(form.getEstimatedStartTime());
+
+            this.taskService.create(form.getDate(), form.getName(), form.getEstimatedTime(), estimatedStartTime);
             L.debug("taskService.create: success");
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
