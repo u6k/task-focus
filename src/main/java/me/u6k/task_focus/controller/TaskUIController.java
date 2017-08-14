@@ -2,8 +2,11 @@
 package me.u6k.task_focus.controller;
 
 import java.util.Date;
+import java.util.List;
 
+import me.u6k.task_focus.model.Task;
 import me.u6k.task_focus.service.TaskService;
+import me.u6k.task_focus.util.DateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +25,28 @@ public class TaskUIController {
 
     @Autowired
     private TaskService taskService;
+
+    @RequestMapping(value = "/", method = RequestMethod.GET)
+    public String index() {
+        L.debug("#index:");
+
+        L.debug("return");
+        return "redirect:/ui/tasks";
+    }
+
+    @RequestMapping(value = "/ui/tasks", method = RequestMethod.GET)
+    public String list(Model model) {
+        L.debug("#list: model={}", model);
+
+        List<Task> taskList = this.taskService.findByDate(new Date());
+        L.debug("taskService.findByDate: taskList={}", taskList);
+
+        model.addAttribute("taskList", taskList);
+        L.debug("setup model: taskList={}", taskList);
+
+        L.debug("return");
+        return "tasks";
+    }
 
     @RequestMapping(value = "/ui/tasks/add", method = RequestMethod.GET)
     public String addInit(@ModelAttribute("form") TaskVO form, Model model) {
