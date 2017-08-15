@@ -6,6 +6,7 @@ import static org.junit.Assert.*;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.TimeZone;
 import java.util.UUID;
 
@@ -60,7 +61,7 @@ public class TaskService_create_Test {
 
     @Test
     public void 作業名が空の場合はエラー() throws Exception {
-        Date date = DateUtil.parseFullDatetime("2015-12-23 00:00:00.000");
+        Date date = DateUtil.parseFullDatetime(Optional.ofNullable("2015-12-23 00:00:00.000")).orElse(null);
 
         // nullはエラー
         try {
@@ -105,7 +106,7 @@ public class TaskService_create_Test {
 
     @Test
     public void 見積り時間がマイナスの場合はエラー() throws Exception {
-        Date date = DateUtil.parseFullDatetime("2015-12-23 00:00:00.000");
+        Date date = DateUtil.parseFullDatetime(Optional.ofNullable("2015-12-23 00:00:00.000")).orElse(null);
 
         // マイナスはエラー
         try {
@@ -165,10 +166,10 @@ public class TaskService_create_Test {
 
     @Test
     public void 開始予定時刻と作業日が異なる場合はエラー() throws Exception {
-        Date date = DateUtil.parseFullDatetime("2015-12-23 00:00:00.000");
+        Date date = DateUtil.parseFullDatetime(Optional.ofNullable("2015-12-23 00:00:00.000")).orElse(null);
 
         try {
-            Date estimatedStartTime = DateUtil.parseFullDatetime("2015-12-24 13:00:00.000");
+            Date estimatedStartTime = DateUtil.parseFullDatetime(Optional.ofNullable("2015-12-24 13:00:00.000")).orElse(null);
             this.taskService.create(date, "テスト作業", 0, estimatedStartTime);
 
             fail();
@@ -176,7 +177,7 @@ public class TaskService_create_Test {
             assertThat(e.getMessage(), is("date and estimatedStartTime are different day. date=Wed Dec 23 00:00:00 UTC 2015, estimatedStartTime=Thu Dec 24 13:00:00 UTC 2015"));
         }
 
-        Date estimatedStartTime = DateUtil.parseFullDatetime("2015-12-23 14:27:00.000");
+        Date estimatedStartTime = DateUtil.parseFullDatetime(Optional.ofNullable("2015-12-23 14:27:00.000")).orElse(null);
         UUID id = this.taskService.create(date, "テスト作業", 0, estimatedStartTime);
         Task t = this.taskRepo.findOne(id);
         assertThat(t.getId(), is(id));

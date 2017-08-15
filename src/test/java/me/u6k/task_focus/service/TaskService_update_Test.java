@@ -4,6 +4,7 @@ package me.u6k.task_focus.service;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
+import java.util.Optional;
 import java.util.TimeZone;
 import java.util.UUID;
 
@@ -43,11 +44,11 @@ public class TaskService_update_Test {
 
         this.taskRepo.deleteAllInBatch();
 
-        this.task1id = this.taskService.create(DateUtil.parseFullDatetime("2017-08-12 23:59:59.999"), "テスト作業0", 0, null);
-        this.task2id = this.taskService.create(DateUtil.parseFullDatetime("2017-08-13 00:00:00.000"), "テスト作業1", 0, null);
-        this.task3id = this.taskService.create(DateUtil.parseFullDatetime("2017-08-13 12:34:56.987"), "テスト作業2", 0, null);
-        this.task4id = this.taskService.create(DateUtil.parseFullDatetime("2017-08-13 23:59:59.999"), "テスト作業3", 0, null);
-        this.task5id = this.taskService.create(DateUtil.parseFullDatetime("2017-08-14 00:00:00.000"), "テスト作業4", 0, null);
+        this.task1id = this.taskService.create(DateUtil.parseFullDatetime(Optional.ofNullable("2017-08-12 23:59:59.999")).orElse(null), "テスト作業0", 0, null);
+        this.task2id = this.taskService.create(DateUtil.parseFullDatetime(Optional.ofNullable("2017-08-13 00:00:00.000")).orElse(null), "テスト作業1", 0, null);
+        this.task3id = this.taskService.create(DateUtil.parseFullDatetime(Optional.ofNullable("2017-08-13 12:34:56.987")).orElse(null), "テスト作業2", 0, null);
+        this.task4id = this.taskService.create(DateUtil.parseFullDatetime(Optional.ofNullable("2017-08-13 23:59:59.999")).orElse(null), "テスト作業3", 0, null);
+        this.task5id = this.taskService.create(DateUtil.parseFullDatetime(Optional.ofNullable("2017-08-14 00:00:00.000")).orElse(null), "テスト作業4", 0, null);
     }
 
     @Test
