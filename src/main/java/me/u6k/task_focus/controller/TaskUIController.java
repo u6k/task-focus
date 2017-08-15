@@ -1,15 +1,12 @@
 
 package me.u6k.task_focus.controller;
 
-import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import me.u6k.task_focus.model.Task;
 import me.u6k.task_focus.service.TaskService;
-import me.u6k.task_focus.util.DateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,11 +39,13 @@ public class TaskUIController {
     public String list(Model model) {
         L.debug("#list: model={}", model);
 
-        List<Task> taskList = this.taskService.findByDate(new Date());
+        Date date = new Date();
+        List<Task> taskList = this.taskService.findByDate(date);
         L.debug("taskService.findByDate: taskList={}", taskList);
 
+        model.addAttribute("date", date);
         model.addAttribute("taskList", taskList);
-        L.debug("setup model: taskList={}", taskList);
+        L.debug("setup model: model={}", model);
 
         L.debug("return");
         return "tasks";
@@ -56,7 +55,7 @@ public class TaskUIController {
     public String addInit(@ModelAttribute("form") TaskVO form, Model model) {
         L.debug("#addInit: form={}, model={}", form, model);
 
-        form.setDate(DateUtil.formatDate(Optional.of(new Date())).get());
+        form.setDate(new Date());
         L.debug("setup form: form={}", form);
 
         L.debug("return");
@@ -74,12 +73,9 @@ public class TaskUIController {
         }
 
         try {
-            Date date = DateUtil.parseDate(Optional.ofNullable(form.getDate())).orElse(null);
-            Date estimatedStartTime = DateUtil.parseHourMinute(Optional.ofNullable(form.getEstimatedStartTime())).orElse(null);
-
-            this.taskService.create(date, form.getName(), form.getEstimatedTime(), estimatedStartTime);
+            this.taskService.create(form.getDate(), form.getName(), form.getEstimatedTime(), form.getEstimatedStartTime());
             L.debug("taskService.create: success");
-        } catch (IllegalArgumentException | ParseException e) {
+        } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
             L.debug("setup model: model={}", model);
 
@@ -96,12 +92,12 @@ public class TaskUIController {
         L.debug("#editInit: id={}, form={}, model={}", id, form, model);
 
         Task task = this.taskService.findById(UUID.fromString(id));
-        form.setDate(DateUtil.formatDate(Optional.of(task.getDate())).orElse(null));
+        form.setDate(task.getDate());
         form.setName(task.getName());
         form.setEstimatedTime(task.getEstimatedTime());
-        form.setEstimatedStartTime(DateUtil.formatHourMinute(Optional.ofNullable(task.getEstimatedStartTime())).orElse(null));
-        form.setStartTime(DateUtil.formatHourMinute(Optional.ofNullable(task.getStartTime())).orElse(null));
-        form.setEndTime(DateUtil.formatHourMinute(Optional.ofNullable(task.getEndTime())).orElse(null));
+        form.setEstimatedStartTime(task.getEstimatedStartTime());
+        form.setStartTime(task.getStartTime());
+        form.setEndTime(task.getEndTime());
         L.debug("setup form: form={}", form);
 
         model.addAttribute("id", id);
@@ -123,14 +119,10 @@ public class TaskUIController {
 
         try {
             UUID taskId = UUID.fromString(id);
-            Date date = DateUtil.parseDate(Optional.of(form.getDate())).orElse(null);
-            Date estimatedStartTime = DateUtil.parseHourMinute(Optional.ofNullable(form.getEstimatedStartTime())).orElse(null);
-            Date startTime = DateUtil.parseHourMinute(Optional.ofNullable(form.getStartTime())).orElse(null);
-            Date endTime = DateUtil.parseHourMinute(Optional.ofNullable(form.getEndTime())).orElse(null);
 
-            this.taskService.update(taskId, date, form.getName(), form.getEstimatedTime(), estimatedStartTime, startTime, endTime);
+            this.taskService.update(taskId, form.getDate(), form.getName(), form.getEstimatedTime(), form.getEstimatedStartTime(), form.getStartTime(), form.getEndTime());
             L.debug("taskService.edit: success");
-        } catch (IllegalArgumentException | ParseException e) {
+        } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
             L.debug("setup model: model={}", model);
 

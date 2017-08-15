@@ -20,7 +20,7 @@ body {
         <div class="alert alert-danger" role="alert" th:if="${error}" th:text="${error}">エラー</div>
         <form role="form" action="tasks-add.html" method="post" th:action="@{/ui/tasks/add}" th:object="${form}">
             <div class="form-group" th:class="${#fields.hasErrors('date')}? 'form-group has-error' : 'form-group'">
-                <label for="date">作業日</label> <input type="text" class="form-control" id="date" name="date" placeholder="2017/03/23" th:field="*{date}"></input><span class="help-block" th:if="${#fields.hasErrors('date')}" th:errors="*{date}"></span>
+                <label for="date">作業日</label> <input type="text" class="form-control" id="date" name="date" placeholder="2017-03-23" th:field="*{date}"></input><span class="help-block" th:if="${#fields.hasErrors('date')}" th:errors="*{date}"></span>
             </div>
             <div class="form-group has-error" th:class="${#fields.hasErrors('name')}? 'form-group has-error' : 'form-group'">
                 <label for="name">作業名</label><input type="text" class="form-control" id="name" name="name" placeholder="本を読む" th:field="*{name}"></input><span class="help-block" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">error</span>
