@@ -1,13 +1,13 @@
 
 package me.u6k.task_focus.service;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
 import me.u6k.task_focus.model.Task;
 import me.u6k.task_focus.model.TaskRepository;
-import me.u6k.task_focus.util.DateUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
@@ -26,30 +26,30 @@ public class TaskService {
     private TaskRepository taskRepo;
 
     public UUID create(Date date, String name, int estimatedTime, Date estimatedStartTime) {
-        L.trace("#create: date={}, name={}, estimatedTime={}, estimatedStartTime={}", date, name, estimatedTime, estimatedStartTime);
+        L.debug("#create: date={}, name={}, estimatedTime={}, estimatedStartTime={}", date, name, estimatedTime, estimatedStartTime);
 
         /*
          * 入力チェック
          */
-        L.trace("validate: date={}", date);
+        L.debug("validate: date={}", date);
         if (date == null) {
             throw new IllegalArgumentException("date is null.");
         }
 
-        L.trace("validate: name={}", name);
+        L.debug("validate: name={}", name);
         if (StringUtils.isBlank(name)) {
             throw new IllegalArgumentException("name is blank.");
         }
 
-        L.trace("validate: estimatedTime={}", estimatedTime);
+        L.debug("validate: estimatedTime={}", estimatedTime);
         if (estimatedTime < 0) {
             throw new IllegalArgumentException("estimatedTime < 0. estimatedTime=" + estimatedTime);
         }
 
-        L.trace("validate: estimatedStartTime={}", estimatedStartTime);
+        L.debug("validate: estimatedStartTime={}", estimatedStartTime);
         if (estimatedStartTime != null) {
             boolean isSameDay = DateUtils.isSameDay(date, estimatedStartTime);
-            L.trace("validate: isSameDay(date, estimatedStartTime)={}", isSameDay);
+            L.debug("validate: isSameDay(date, estimatedStartTime)={}", isSameDay);
             if (!isSameDay) {
                 throw new IllegalArgumentException("date and estimatedStartTime are different day. date=" + date + ", estimatedStartTime=" + estimatedStartTime);
             }
@@ -60,7 +60,7 @@ public class TaskService {
          */
         Task task = new Task();
         task.setId(UUID.randomUUID());
-        task.setDate(DateUtil.datetimeToDate(date));
+        task.setDate(DateUtils.truncate(date, Calendar.DAY_OF_MONTH));
         // TODO 正しい作業順を設定する。
         task.setOrderOfDate(0);
         task.setName(name.trim());
@@ -68,68 +68,68 @@ public class TaskService {
         task.setEstimatedStartTime(estimatedStartTime);
         task.setStartTime(null);
         task.setEndTime(null);
-        L.trace("new Task: task={}", task);
+        L.debug("new Task: task={}", task);
 
         this.taskRepo.save(task);
-        L.trace("taskRepo.save: success");
+        L.debug("taskRepo.save: success");
 
-        L.trace("return: task.getId={}", task.getId());
+        L.debug("return: task.getId={}", task.getId());
         return task.getId();
     }
 
     public void update(UUID id, Date date, String name, int estimatedTime, Date estimatedStartTime, Date startTime, Date endTime) {
-        L.trace("#update: id={}, date={}, name={}, estimatedTime={}, estimatedStartTime={}, startTime={}, endTime={}", id, date, name, estimatedTime, estimatedStartTime, startTime, endTime);
+        L.debug("#update: id={}, date={}, name={}, estimatedTime={}, estimatedStartTime={}, startTime={}, endTime={}", id, date, name, estimatedTime, estimatedStartTime, startTime, endTime);
 
         /*
          * 入力チェック
          */
-        L.trace("validate: id={}", id);
+        L.debug("validate: id={}", id);
         if (id == null) {
             throw new IllegalArgumentException("id is null.");
         }
 
-        L.trace("validate: date={}", date);
+        L.debug("validate: date={}", date);
         if (date == null) {
             throw new IllegalArgumentException("date is null.");
         }
 
-        L.trace("validate: name={}", name);
+        L.debug("validate: name={}", name);
         if (StringUtils.isBlank(name)) {
             throw new IllegalArgumentException("name is blank.");
         }
 
-        L.trace("validate: estimatedTime={}", estimatedTime);
+        L.debug("validate: estimatedTime={}", estimatedTime);
         if (estimatedTime < 0) {
             throw new IllegalArgumentException("estimatedTime < 0. estimatedTime=" + estimatedTime);
         }
 
-        L.trace("validate: estimatedStartTime={}", estimatedStartTime);
+        L.debug("validate: estimatedStartTime={}", estimatedStartTime);
         if (estimatedStartTime != null) {
             boolean isSameDay = DateUtils.isSameDay(date, estimatedStartTime);
-            L.trace("validate: isSameDay={}", isSameDay);
+            L.debug("validate: isSameDay={}", isSameDay);
             if (!isSameDay) {
                 throw new IllegalArgumentException("date and estimatedStartTime are different day. date=" + date + ", estimatedStartTime=" + estimatedStartTime);
             }
         }
 
-        L.trace("validate: startTime={}", startTime);
+        L.debug("validate: startTime={}", startTime);
         if (startTime != null) {
             boolean isSameDay = DateUtils.isSameDay(date, startTime);
-            L.trace("validate: isSameDay(date, startTime)={}", isSameDay);
+            L.debug("validate: isSameDay(date, startTime)={}", isSameDay);
             if (!isSameDay) {
                 throw new IllegalArgumentException("date and startTime are different day. date=" + date + ", startTime=" + startTime);
             }
         }
 
-        L.trace("validate: endTime={}", endTime);
+        L.debug("validate: endTime={}", endTime);
         if (endTime != null) {
-            L.trace("validate: startTime={}", startTime);
+            L.debug("validate: startTime={}", startTime);
             if (startTime == null) {
                 throw new IllegalArgumentException("startTime is null, but endTime is not null. endTime=" + endTime);
             }
 
             boolean compare = (startTime.getTime() <= endTime.getTime());
-            L.trace("validate: (startTime <= endTime)={}", compare);
+            L.debug("validate: (startTime <= endTime)={}", compare);
             if (!compare) {
                 throw new IllegalArgumentException("startTime > endTime. startTime=" + startTime + ", endTime=" + endTime);
             }
@@ -140,7 +140,7 @@ public class TaskService {
          */
         Task task = this.taskRepo.findOne(id);
 
-        L.trace("findOne: task={}", task);
+        L.debug("findOne: task={}", task);
         if (task == null) {
             throw new IllegalArgumentException("task not found. id=" + id);
         }
@@ -148,7 +148,7 @@ public class TaskService {
         /*
          * タスクを更新
          */
-        task.setDate(DateUtil.datetimeToDate(date));
+        task.setDate(DateUtils.truncate(date, Calendar.HOUR));
         // TODO 正しい作業順を設定する。
         task.setOrderOfDate(0);
         task.setName(name.trim());
@@ -156,19 +156,19 @@ public class TaskService {
         task.setEstimatedStartTime(estimatedStartTime);
         task.setStartTime(startTime);
         task.setEndTime(endTime);
-        L.trace("setup Task: task={}", task);
+        L.debug("setup Task: task={}", task);
 
         this.taskRepo.save(task);
-        L.trace("taskRepo.save: success");
+        L.debug("taskRepo.save: success");
     }
 
     public List<Task> findByDate(Date date) {
-        L.trace("#findByDate: date={}", date);
+        L.debug("#findByDate: date={}", date);
 
         /*
          * 入力チェック
          */
-        L.trace("validate: date={}", date);
+        L.debug("validate: date={}", date);
         if (date == null) {
             throw new IllegalArgumentException("date is null.");
         }
@@ -176,14 +176,35 @@ public class TaskService {
         /*
          * タスクを検索
          */
-        date = DateUtil.datetimeToDate(date);
-        L.trace("datetimeToDate: date={}", date);
+        date = DateUtils.truncate(date, Calendar.DAY_OF_MONTH);
+        L.debug("DateUtils.truncate(HOUR): date={}", date);
 
         List<Task> taskList = this.taskRepo.findByDate(date);
-        L.trace("findByDate: taskList.size={}", taskList.size());
+        L.debug("findByDate: taskList.size={}", taskList.size());
 
-        L.trace("return: taskList.size={}", taskList.size());
+        L.debug("return: taskList.size={}", taskList.size());
         return taskList;
+    }
+
+    public Task findById(UUID id) {
+        L.debug("#findById: id={}", id);
+
+        /*
+         * 入力チェック
+         */
+        L.debug("validate: id={}", id);
+        if (id == null) {
+            throw new IllegalArgumentException("id is null.");
+        }
+
+        /*
+         * タスクを検索
+         */
+        Task task = this.taskRepo.findOne(id);
+        L.debug("findOne: task={}", task);
+
+        L.debug("return: task={}", task);
+        return task;
     }
 
 }

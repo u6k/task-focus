@@ -10,7 +10,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.Range;
 
-public class TaskVO {
+public class TaskEditVO {
 
     @NotNull
     @Pattern(regexp = "\\d{4}-\\d{2}-\\d{2}")
@@ -26,7 +26,13 @@ public class TaskVO {
     @Pattern(regexp = "\\d{2}:\\d{2}")
     private String estimatedStartTime;
 
-    public TaskVO() {
+    @Pattern(regexp = "\\d{2}:\\d{2}")
+    private String startTime;
+
+    @Pattern(regexp = "\\d{2}:\\d{2}")
+    private String endTime;
+
+    public TaskEditVO() {
     }
 
     @Override
@@ -74,6 +80,22 @@ public class TaskVO {
 
     public void setEstimatedStartTime(String estimatedStartTime) {
         this.estimatedStartTime = estimatedStartTime;
+    }
+
+    public String getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(String startTime) {
+        this.startTime = startTime;
+    }
+
+    public String getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(String endTime) {
+        this.endTime = endTime;
     }
 
 }
