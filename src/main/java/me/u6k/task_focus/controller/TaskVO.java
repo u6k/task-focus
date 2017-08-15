@@ -1,20 +1,22 @@
 
 package me.u6k.task_focus.controller;
 
+import java.util.Date;
+
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.Range;
+import org.springframework.format.annotation.DateTimeFormat;
 
 public class TaskVO {
 
     @NotNull
-    @Pattern(regexp = "\\d{4}-\\d{2}-\\d{2}")
-    private String date;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private Date date;
 
     @NotBlank
     private String name;
@@ -23,8 +25,8 @@ public class TaskVO {
     @Range(min = 0)
     private int estimatedTime;
 
-    @Pattern(regexp = "\\d{2}:\\d{2}")
-    private String estimatedStartTime;
+    @DateTimeFormat(pattern = "HH:mm")
+    private Date estimatedStartTime;
 
     public TaskVO() {
     }
@@ -44,11 +46,11 @@ public class TaskVO {
         return ToStringBuilder.reflectionToString(this);
     }
 
-    public String getDate() {
+    public Date getDate() {
         return date;
     }
 
-    public void setDate(String date) {
+    public void setDate(Date date) {
         this.date = date;
     }
 
@@ -68,11 +70,11 @@ public class TaskVO {
         this.estimatedTime = estimatedTime;
     }
 
-    public String getEstimatedStartTime() {
+    public Date getEstimatedStartTime() {
         return estimatedStartTime;
     }
 
-    public void setEstimatedStartTime(String estimatedStartTime) {
+    public void setEstimatedStartTime(Date estimatedStartTime) {
         this.estimatedStartTime = estimatedStartTime;
     }
 
