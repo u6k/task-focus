@@ -148,7 +148,7 @@ public class TaskService {
         /*
          * タスクを更新
          */
-        task.setDate(DateUtils.truncate(date, Calendar.HOUR));
+        task.setDate(DateUtils.truncate(date, Calendar.DAY_OF_MONTH));
         // TODO 正しい作業順を設定する。
         task.setOrderOfDate(0);
         task.setName(name.trim());
