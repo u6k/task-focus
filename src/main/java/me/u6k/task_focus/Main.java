@@ -1,6 +1,7 @@
 
 package me.u6k.task_focus;
 
+import java.util.Locale;
 import java.util.TimeZone;
 
 import javax.annotation.PostConstruct;
@@ -13,6 +14,7 @@ public class Main {
 
     @PostConstruct
     public void started() {
+        Locale.setDefault(Locale.US);
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
     }
 
