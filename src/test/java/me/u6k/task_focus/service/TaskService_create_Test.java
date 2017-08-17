@@ -54,8 +54,8 @@ public class TaskService_create_Test {
         try {
             this.taskService.create(null, "テスト作業", 0, null);
             fail();
-        } catch (IllegalArgumentException e) {
-            assertThat(e.getMessage(), is("date is null."));
+        } catch (IllegalStateException e) {
+            assertThat(e.getMessage(), is("task.date is null."));
         }
     }
 
@@ -67,24 +67,24 @@ public class TaskService_create_Test {
         try {
             this.taskService.create(date, null, 0, null);
             fail();
-        } catch (IllegalArgumentException e) {
-            assertThat(e.getMessage(), is("name is blank."));
+        } catch (IllegalStateException e) {
+            assertThat(e.getMessage(), is("task.name is blank."));
         }
 
         // 空文字列はエラー
         try {
             this.taskService.create(date, "", 0, null);
             fail();
-        } catch (IllegalArgumentException e) {
-            assertThat(e.getMessage(), is("name is blank."));
+        } catch (IllegalStateException e) {
+            assertThat(e.getMessage(), is("task.name is blank."));
         }
 
         // 空白のみはエラー
         try {
             this.taskService.create(date, "   ", 0, null);
             fail();
-        } catch (IllegalArgumentException e) {
-            assertThat(e.getMessage(), is("name is blank."));
+        } catch (IllegalStateException e) {
+            assertThat(e.getMessage(), is("task.name is blank."));
         }
 
         // 前後の空白はトリミング
@@ -112,16 +112,16 @@ public class TaskService_create_Test {
         try {
             this.taskService.create(date, "テスト作業", -1, null);
             fail();
-        } catch (IllegalArgumentException e) {
-            assertThat(e.getMessage(), is("estimatedTime < 0. estimatedTime=-1"));
+        } catch (IllegalStateException e) {
+            assertThat(e.getMessage(), is("task.estimatedTime < 0"));
         }
 
         // マイナスはエラー
         try {
             this.taskService.create(date, "テスト作業", -123, null);
             fail();
-        } catch (IllegalArgumentException e) {
-            assertThat(e.getMessage(), is("estimatedTime < 0. estimatedTime=-123"));
+        } catch (IllegalStateException e) {
+            assertThat(e.getMessage(), is("task.estimatedTime < 0"));
         }
 
         // 0は正常
@@ -173,8 +173,8 @@ public class TaskService_create_Test {
             this.taskService.create(date, "テスト作業", 0, estimatedStartTime);
 
             fail();
-        } catch (IllegalArgumentException e) {
-            assertThat(e.getMessage(), is("date and estimatedStartTime are different day. date=Wed Dec 23 00:00:00 UTC 2015, estimatedStartTime=Thu Dec 24 13:00:00 UTC 2015"));
+        } catch (IllegalStateException e) {
+            assertThat(e.getMessage(), is("task.date and task.estimatedStartTime is not same day."));
         }
 
         Date estimatedStartTime = DateUtil.parseFullDatetime(Optional.ofNullable("2015-12-23 14:27:00.000")).orElse(null);
