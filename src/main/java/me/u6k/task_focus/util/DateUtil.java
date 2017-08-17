@@ -1,16 +1,12 @@
 
 package me.u6k.task_focus.util;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Optional;
 
-import org.apache.commons.lang3.time.DateUtils;
-
 public final class DateUtil {
-
-    private static final String FORMAT_FULL_DATETIME = "yyyy-MM-dd HH:mm:ss.SSS";
 
     private static final String FORMAT_DATE = "yyyy-MM-dd";
 
@@ -19,16 +15,33 @@ public final class DateUtil {
     private DateUtil() {
     }
 
-    public static Optional<Date> parseFullDatetime(Optional<String> str) throws ParseException {
-        return parse(str, FORMAT_FULL_DATETIME);
+    public static Date toDate(int year, int month, int day, int hour, int minute, int second, int millisecond) {
+        Calendar c = Calendar.getInstance();
+        c.set(Calendar.YEAR, year);
+        c.set(Calendar.MONTH, month - 1);
+        c.set(Calendar.DAY_OF_MONTH, day);
+        c.set(Calendar.HOUR_OF_DAY, hour);
+        c.set(Calendar.MINUTE, minute);
+        c.set(Calendar.SECOND, second);
+        c.set(Calendar.MILLISECOND, millisecond);
+
+        return c.getTime();
     }
 
-    public static Optional<Date> parseDate(Optional<String> str) throws ParseException {
-        return parse(str, FORMAT_DATE);
+    public static Date toDate(int year, int month, int day) {
+        return toDate(year, month, day, 0, 0, 0, 0);
     }
 
-    public static Optional<Date> parseHourMinute(Optional<String> str) throws ParseException {
-        return parse(str, FORMAT_HOUR_MINUTE);
+    public static Date toDate(int hour, int minute) {
+        Calendar c = Calendar.getInstance();
+
+        return toDate(c.get(Calendar.YEAR),
+            c.get(Calendar.MONTH),
+            c.get(Calendar.DAY_OF_MONTH),
+            hour,
+            minute,
+            c.get(Calendar.SECOND),
+            c.get(Calendar.MILLISECOND));
     }
 
     public static Optional<String> formatDate(Optional<Date> date) {
@@ -37,16 +50,6 @@ public final class DateUtil {
 
     public static Optional<String> formatHourMinute(Optional<Date> date) {
         return format(date, FORMAT_HOUR_MINUTE);
-    }
-
-    private static Optional<Date> parse(Optional<String> str, String format) throws ParseException {
-        if (!str.isPresent()) {
-            return Optional.empty();
-        }
-
-        Optional<Date> date = Optional.of(DateUtils.parseDate(str.get(), format));
-
-        return date;
     }
 
     private static Optional<String> format(Optional<Date> date, String format) {
