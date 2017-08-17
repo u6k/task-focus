@@ -6,7 +6,6 @@ import static org.junit.Assert.*;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.TimeZone;
 import java.util.UUID;
 
@@ -61,7 +60,7 @@ public class TaskService_create_Test {
 
     @Test
     public void 作業名が空の場合はエラー() throws Exception {
-        Date date = DateUtil.parseFullDatetime(Optional.ofNullable("2015-12-23 00:00:00.000")).orElse(null);
+        Date date = DateUtil.toDate(2015, 12, 23, 0, 0, 0, 0);
 
         // nullはエラー
         try {
@@ -106,7 +105,7 @@ public class TaskService_create_Test {
 
     @Test
     public void 見積り時間がマイナスの場合はエラー() throws Exception {
-        Date date = DateUtil.parseFullDatetime(Optional.ofNullable("2015-12-23 00:00:00.000")).orElse(null);
+        Date date = DateUtil.toDate(2015, 12, 23, 0, 0, 0, 0);
 
         // マイナスはエラー
         try {
@@ -166,10 +165,10 @@ public class TaskService_create_Test {
 
     @Test
     public void 開始予定時刻と作業日が異なる場合はエラー() throws Exception {
-        Date date = DateUtil.parseFullDatetime(Optional.ofNullable("2015-12-23 00:00:00.000")).orElse(null);
+        Date date = DateUtil.toDate(2015, 12, 23, 0, 0, 0, 0);
 
         try {
-            Date estimatedStartTime = DateUtil.parseFullDatetime(Optional.ofNullable("2015-12-24 13:00:00.000")).orElse(null);
+            Date estimatedStartTime = DateUtil.toDate(2015, 12, 24, 13, 0, 0, 0);
             this.taskService.create(date, "テスト作業", 0, estimatedStartTime);
 
             fail();
@@ -177,7 +176,7 @@ public class TaskService_create_Test {
             assertThat(e.getMessage(), is("task.date and task.estimatedStartTime is not same day."));
         }
 
-        Date estimatedStartTime = DateUtil.parseFullDatetime(Optional.ofNullable("2015-12-23 14:27:00.000")).orElse(null);
+        Date estimatedStartTime = DateUtil.toDate(2015, 12, 23, 14, 27, 0, 0);
         UUID id = this.taskService.create(date, "テスト作業", 0, estimatedStartTime);
         Task t = this.taskRepo.findOne(id);
         assertThat(t.getId(), is(id));
