@@ -6,6 +6,7 @@ import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.UUID;
@@ -490,6 +491,150 @@ public class TaskServiceTest {
 
                 task = this.taskRepo.findOne(this.task5.getId());
                 assertThat(task, is(this.task5));
+            }
+        }
+
+    }
+
+    @RunWith(Parameterized.class)
+    @SpringBootTest
+    public static class findByDate {
+
+        @Autowired
+        private TaskService taskService;
+
+        @Autowired
+        private TaskRepository taskRepo;
+
+        private FindByDateTestParameter param;
+
+        public findByDate(FindByDateTestParameter param) {
+            this.param = param;
+        }
+
+        @Before
+        public void setup() throws Exception {
+            new TestContextManager(this.getClass()).prepareTestInstance(this);
+
+            Locale.setDefault(Locale.US);
+            TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+
+            this.taskRepo.deleteAllInBatch();
+
+            this.taskService.create(DateUtil.toDate(2017, 8, 12, 23, 59, 59, 999), "テスト作業0", 0, null);
+            this.taskService.create(DateUtil.toDate(2017, 8, 13, 0, 0, 0, 0), "テスト作業1", 0, null);
+            this.taskService.create(DateUtil.toDate(2017, 8, 13, 12, 34, 56, 987), "テスト作業2", 0, null);
+            this.taskService.create(DateUtil.toDate(2017, 8, 13, 23, 59, 59, 999), "テスト作業3", 0, null);
+            this.taskService.create(DateUtil.toDate(2017, 8, 14, 0, 0, 0, 0), "テスト作業4", 0, null);
+        }
+
+        public static class FindByDateTestParameter {
+
+            String testName;
+
+            boolean beforeCleanup = false;
+
+            Date date;
+
+            List<Task> result;
+
+            FindByDateTestParameter(String testName) {
+                this.testName = testName;
+            }
+
+            @Override
+            public String toString() {
+                return this.testName;
+            }
+
+            FindByDateTestParameter setBeforeCleanup(boolean beforeCleanup) {
+                this.beforeCleanup = beforeCleanup;
+                return this;
+            }
+
+            FindByDateTestParameter setDate(Date date) {
+                this.date = date;
+                return this;
+            }
+
+            FindByDateTestParameter setResult(List<Task> result) {
+                this.result = result;
+                return this;
+            }
+
+        }
+
+        @Parameters(name = "{0}")
+        public static Iterable<FindByDateTestParameter> getParameters() throws Exception {
+            return Arrays.asList(
+                new FindByDateTestParameter("OK: データが0件")
+                    .setBeforeCleanup(true)
+                    .setDate(new Date())
+                    .setResult(Arrays.asList()),
+                new FindByDateTestParameter("OK: 2017/8/11のデータが0件")
+                    .setDate(DateUtil.toDate(2017, 8, 11, 23, 59, 59, 999))
+                    .setResult(Arrays.asList()),
+                new FindByDateTestParameter("OK: 2017/8/12のデータがヒット(1)")
+                    .setDate(DateUtil.toDate(2017, 8, 12, 0, 0, 0, 0))
+                    .setResult(Arrays.asList(
+                        new Task(null, DateUtil.toDate(2017, 8, 12), 0, "テスト作業0", 0, null, null, null))),
+                new FindByDateTestParameter("OK: 2017/8/12のデータがヒット(2)")
+                    .setDate(DateUtil.toDate(2017, 8, 12, 23, 59, 59, 999))
+                    .setResult(Arrays.asList(
+                        new Task(null, DateUtil.toDate(2017, 8, 12), 0, "テスト作業0", 0, null, null, null))),
+                new FindByDateTestParameter("OK: 2017/8/13のデータがヒット(1)")
+                    .setDate(DateUtil.toDate(2017, 8, 13, 0, 0, 0, 0))
+                    .setResult(Arrays.asList(
+                        new Task(null, DateUtil.toDate(2017, 8, 13), 0, "テスト作業1", 0, null, null, null),
+                        new Task(null, DateUtil.toDate(2017, 8, 13), 0, "テスト作業2", 0, null, null, null),
+                        new Task(null, DateUtil.toDate(2017, 8, 13), 0, "テスト作業3", 0, null, null, null))),
+                new FindByDateTestParameter("OK: 2017/8/13のデータがヒット(2)")
+                    .setDate(DateUtil.toDate(2017, 8, 13, 23, 59, 59, 999))
+                    .setResult(Arrays.asList(
+                        new Task(null, DateUtil.toDate(2017, 8, 13), 0, "テスト作業1", 0, null, null, null),
+                        new Task(null, DateUtil.toDate(2017, 8, 13), 0, "テスト作業2", 0, null, null, null),
+                        new Task(null, DateUtil.toDate(2017, 8, 13), 0, "テスト作業3", 0, null, null, null))),
+                new FindByDateTestParameter("OK: 2017/8/14のデータがヒット(1)")
+                    .setDate(DateUtil.toDate(2017, 8, 14, 0, 0, 0, 0))
+                    .setResult(Arrays.asList(
+                        new Task(null, DateUtil.toDate(2017, 8, 14), 0, "テスト作業4", 0, null, null, null))),
+                new FindByDateTestParameter("OK: 2017/8/14のデータがヒット(2)")
+                    .setDate(DateUtil.toDate(2017, 8, 14, 23, 59, 59, 999))
+                    .setResult(Arrays.asList(
+                        new Task(null, DateUtil.toDate(2017, 8, 14), 0, "テスト作業4", 0, null, null, null))),
+                new FindByDateTestParameter("OK: 2017/8/15のデータが0件")
+                    .setDate(DateUtil.toDate(2017, 8, 15, 0, 0, 0, 0))
+                    .setResult(Arrays.asList()));
+        }
+
+        @Test
+        public void test() {
+            /*
+             * 事前準備
+             */
+            // 必要な場合、事前クリーンアップ
+            if (this.param.beforeCleanup) {
+                this.taskRepo.deleteAllInBatch();
+                assertThat(this.taskRepo.count(), is(0L));
+            }
+
+            /*
+             * テスト実行
+             */
+            List<Task> taskList = this.taskService.findByDate(this.param.date);
+
+            /*
+             * テスト結果検証
+             */
+            // データ件数を検証
+            assertThat(taskList.size(), is(this.param.result.size()));
+
+            // データ内容を検証
+            for (int i = 0; i < this.param.result.size(); i++) {
+                Task expected = this.param.result.get(i);
+                Task actual = taskList.get(i);
+
+                assertThat(expected, is(actual));
             }
         }
 
