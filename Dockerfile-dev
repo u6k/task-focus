@@ -12,4 +12,4 @@ WORKDIR /var/my-app
 # Setup docker run setting
 EXPOSE 8080
 
-CMD ["mvn", "clean", "surefire-report:report", "package"]
+CMD ["mvn", "clean", "package", "surefire-report:report"]
