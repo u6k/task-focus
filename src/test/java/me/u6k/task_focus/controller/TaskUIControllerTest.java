@@ -31,6 +31,7 @@ public class TaskUIControllerTest {
 
     @BeforeClass
     public static void setup() {
+        // FIXME: CircleCIでコントローラー・テストを正常動作できるようにする。
         boolean isUITestSkip = Boolean.parseBoolean(System.getProperty("uitest.skip", "false"));
         System.out.println("isUITestSkip=" + isUITestSkip);
         Assume.assumeFalse("コントローラー・テストがCircleCIでハングアップしてしまうため、スキップ", isUITestSkip);
