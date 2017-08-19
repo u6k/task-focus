@@ -5,7 +5,7 @@
 開発用Dockerイメージをビルド
 
 ```
-docker build -t task-focus-webapp-dev -f Dockerfile-dev .
+docker build -t task-focus-dev -f Dockerfile-dev .
 ```
 
 Eclipseプロジェクトを作成
@@ -13,9 +13,9 @@ Eclipseプロジェクトを作成
 ```
 docker run \
     --rm \
-    -v "${HOME}/.m2:/root/.m2" \
     -v "${PWD}:/var/my-app" \
-    task-focus-webapp-dev mvn eclipse:eclipse
+    -v "${HOME}/.m2:/root/.m2" \
+    task-focus-dev mvn eclipse:eclipse
 ```
 
 テスト&パッケージング
@@ -23,22 +23,19 @@ docker run \
 ```
 docker run \
     --rm \
-    -v "${HOME}/.m2:/root/.m2" \
     -v "${PWD}:/var/my-app" \
-    task-focus-webapp-dev
+    -v "${HOME}/.m2:/root/.m2" \
+    task-focus-dev
 ```
 
 実行用Dockerイメージをビルド
 
 ```
-docker build -t u6kapps/task-focus-webapp .
+docker build -t u6kapps/task-focus .
 ```
 
 実行
 
 ```
-docker run \
-    --rm \
-    -p "8080:8080" \
-    u6kapps/task-focus-webapp
+docker-compose up -d
 ```
