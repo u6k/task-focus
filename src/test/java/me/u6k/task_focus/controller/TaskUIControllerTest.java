@@ -13,8 +13,9 @@ import java.util.UUID;
 import me.u6k.task_focus.model.Task;
 import me.u6k.task_focus.model.TaskRepository;
 import me.u6k.task_focus.service.TaskService;
+import org.junit.Assume;
 import org.junit.Before;
-import org.junit.Ignore;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
@@ -25,9 +26,15 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-@Ignore("CircleCIがハングアップしてしまうため、一時的に無効化")
 @RunWith(Enclosed.class)
 public class TaskUIControllerTest {
+
+    @BeforeClass
+    public static void setup() {
+        boolean isUITestSkip = Boolean.parseBoolean(System.getProperty("uitest.skip", "false"));
+        System.out.println("isUITestSkip=" + isUITestSkip);
+        Assume.assumeFalse("コントローラー・テストがCircleCIでハングアップしてしまうため、スキップ", isUITestSkip);
+    }
 
     @RunWith(SpringRunner.class)
     @SpringBootTest
