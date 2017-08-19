@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import me.u6k.task_focus.model.Task;
 import me.u6k.task_focus.service.TaskService;
+import me.u6k.task_focus.util.DateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,7 +74,10 @@ public class TaskUIController {
         }
 
         try {
-            this.taskService.create(form.getDate(), form.getName(), form.getEstimatedTime(), form.getEstimatedStartTime());
+            this.taskService.create(form.getDate(),
+                form.getName(),
+                form.getEstimatedTime(),
+                form.getDate() != null ? DateUtil.toDatetime(form.getDate(), form.getEstimatedStartTime()) : null);
             L.debug("taskService.create: success");
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
@@ -120,7 +124,13 @@ public class TaskUIController {
         try {
             UUID taskId = UUID.fromString(id);
 
-            this.taskService.update(taskId, form.getDate(), form.getName(), form.getEstimatedTime(), form.getEstimatedStartTime(), form.getStartTime(), form.getEndTime());
+            this.taskService.update(taskId,
+                form.getDate(),
+                form.getName(),
+                form.getEstimatedTime(),
+                form.getDate() != null ? DateUtil.toDatetime(form.getDate(), form.getEstimatedStartTime()) : null,
+                form.getDate() != null ? DateUtil.toDatetime(form.getDate(), form.getStartTime()) : null,
+                form.getDate() != null ? DateUtil.toDatetime(form.getDate(), form.getEndTime()) : null);
             L.debug("taskService.edit: success");
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());

@@ -38,6 +38,17 @@ public final class DateUtil {
         return format(date, FORMAT_HOUR_MINUTE);
     }
 
+    public static Date toDatetime(Date datePart, Date timePart) {
+        if (timePart == null) {
+            return null;
+        }
+
+        String str = formatDate(datePart) + " " + formatHourMinute(timePart) + ":00.000";
+        Date date = parseFullDatetime(str);
+
+        return date;
+    }
+
     private static String format(Date date, String format) {
         if (date == null) {
             return null;
