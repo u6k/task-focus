@@ -17,7 +17,7 @@ body {
     <nav th:replace="navigation :: nav"></nav>
     <div class="container-fluid">
         <h1 class="page-header">Tasks</h1>
-        <h2>作業日:</h2>
+        <h2>作業日: <span th:text="${#dates.format(date, 'yyyy-MM-dd')}">2017-08-15</span></h2>
         <table class="table">
             <thead>
                 <tr>
@@ -31,10 +31,10 @@ body {
             <tbody>
                 <tr th:each="task : ${taskList}">
                     <td><a href="/ui/tasks/xxxxx-xx-xx-xx-xxxx/edit" th:text="${task.name}" th:href="@{'/ui/tasks/'+${task.id}+'/edit'}">テスト作業1</a></td>
-                    <td th:text="${#dates.format(task.estimatedStartTime, 'HH:mm')}">13:00</td>
+                    <td th:text="${task.estimatedStartTime} ? ${#dates.format(task.estimatedStartTime, 'HH:mm')} : ''">13:00</td>
                     <td th:text="${task.estimatedTime}">1.0</td>
-                    <td th:text="${#dates.format(task.startTime, 'HH:mm')}" th:if="${task.startTime}"></td>
-                    <td th:text="${#dates.format(task.endTime, 'HH:mm')}" th:if="${task.endTime}"></td>
+                    <td th:text="${task.startTime} ? ${#dates.format(task.startTime, 'HH:mm')} : ''">13:00</td>
+                    <td th:text="${task.endTime} ? ${#dates.format(task.endTime, 'HH:mm')} : ''">14:00</td>
                 </tr>
             </tbody>
         </table>

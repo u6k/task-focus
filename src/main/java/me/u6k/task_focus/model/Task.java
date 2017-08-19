@@ -45,6 +45,17 @@ public class Task {
     public Task() {
     }
 
+    public Task(UUID id, Date date, int orderOfDate, String name, int estimatedTime, Date estimatedStartTime, Date startTime, Date endTime) {
+        this.id = id;
+        this.date = date;
+        this.orderOfDate = orderOfDate;
+        this.name = name;
+        this.estimatedTime = estimatedTime;
+        this.estimatedStartTime = estimatedStartTime;
+        this.startTime = startTime;
+        this.endTime = endTime;
+    }
+
     @Override
     public int hashCode() {
         return HashCodeBuilder.reflectionHashCode(this);
