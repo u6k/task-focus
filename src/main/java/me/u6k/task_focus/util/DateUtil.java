@@ -4,7 +4,6 @@ package me.u6k.task_focus.util;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Optional;
 import java.util.TimeZone;
 
 public final class DateUtil {
@@ -31,16 +30,20 @@ public final class DateUtil {
         return date;
     }
 
-    public static Optional<String> formatDate(Optional<Date> date) {
+    public static String formatDate(Date date) {
         return format(date, FORMAT_DATE);
     }
 
-    public static Optional<String> formatHourMinute(Optional<Date> date) {
+    public static String formatHourMinute(Date date) {
         return format(date, FORMAT_HOUR_MINUTE);
     }
 
-    private static Optional<String> format(Optional<Date> date, String format) {
-        Optional<String> str = date.map(x -> new SimpleDateFormat(format).format(x));
+    private static String format(Date date, String format) {
+        if (date == null) {
+            return null;
+        }
+
+        String str = new SimpleDateFormat(format).format(date);
 
         return str;
     }
