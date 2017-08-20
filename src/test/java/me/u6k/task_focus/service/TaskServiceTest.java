@@ -506,6 +506,163 @@ public class TaskServiceTest {
 
     @RunWith(Parameterized.class)
     @SpringBootTest
+    public static class delete {
+
+        @Autowired
+        private TaskService taskService;
+
+        @Autowired
+        private TaskRepository taskRepo;
+
+        private DeleteTestParameter param;
+
+        private Task task1;
+
+        private Task task2;
+
+        private Task task3;
+
+        private Task task4;
+
+        private Task task5;
+
+        public delete(DeleteTestParameter param) {
+            this.param = param;
+        }
+
+        @Before
+        public void setup() throws Exception {
+            // DI準備
+            new TestContextManager(this.getClass()).prepareTestInstance(this);
+
+            // 環境設定
+            Locale.setDefault(Locale.US);
+            TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+
+            // 事前条件クリーンアップ
+            this.taskRepo.deleteAllInBatch();
+
+            // 事前条件準備
+            this.task1 = new Task(UUID.fromString("f37826b7-759a-471e-ab98-e4b7fc406d7a"), DateUtil.parseFullDatetime("2017-08-12 23:59:59.999"), 0, "テスト作業1", 0, null, null, null);
+            this.taskRepo.save(this.task1);
+
+            this.task2 = new Task(UUID.fromString("ef089e3b-c51c-4dbf-aec4-0ebbfb00a5c0"), DateUtil.parseFullDatetime("2017-08-13 00:00:00.000"), 0, "テスト作業2", 0, null, null, null);
+            this.taskRepo.save(this.task2);
+
+            this.task3 = new Task(UUID.fromString("fb018cd8-85a0-4108-99d8-12eb56edfa29"), DateUtil.parseFullDatetime("2017-08-13 12:34:56.987"), 0, "テスト作業3", 0, null, null, null);
+            this.taskRepo.save(this.task3);
+
+            this.task4 = new Task(UUID.fromString("e9c212b0-40bf-4cc6-bc9f-f51277f8f5d8"), DateUtil.parseFullDatetime("2017-08-13 23:59:59.999"), 0, "テスト作業4", 0, null, null, null);
+            this.taskRepo.save(this.task4);
+
+            this.task5 = new Task(UUID.fromString("7d5d8e20-2f6a-4aea-9069-b80b54068c02"), DateUtil.parseFullDatetime("2017-08-14 00:00:00.000"), 0, "テスト作業5", 0, null, null, null);
+            this.taskRepo.save(this.task5);
+        }
+
+        public static class DeleteTestParameter {
+
+            String testName;
+
+            UUID id;
+
+            long result;
+
+            Class<? extends Throwable> cause;
+
+            String causeMessage;
+
+            DeleteTestParameter(String testName) {
+                this.testName = testName;
+            }
+
+            @Override
+            public String toString() {
+                return this.testName;
+            }
+
+            public DeleteTestParameter setTestName(String testName) {
+                this.testName = testName;
+                return this;
+            }
+
+            public DeleteTestParameter setId(UUID id) {
+                this.id = id;
+                return this;
+            }
+
+            public DeleteTestParameter setResult(long result) {
+                this.result = result;
+                return this;
+            }
+
+            public DeleteTestParameter setCause(Class<? extends Throwable> cause) {
+                this.cause = cause;
+                return this;
+            }
+
+            public DeleteTestParameter setCauseMessage(String causeMessage) {
+                this.causeMessage = causeMessage;
+                return this;
+            }
+
+        }
+
+        @Parameters(name = "{0}")
+        public static Iterable<DeleteTestParameter> getParameters() throws Exception {
+            return Arrays.asList(
+                new DeleteTestParameter("OK: 削除できる")
+                    .setId(UUID.fromString("ef089e3b-c51c-4dbf-aec4-0ebbfb00a5c0"))
+                    .setResult(4L),
+                new DeleteTestParameter("NG: idがnull")
+                    .setId(null)
+                    .setResult(5L)
+                    .setCause(IllegalArgumentException.class)
+                    .setCauseMessage("id is null."),
+                new DeleteTestParameter("NG: 作業が存在しない")
+                    .setId(UUID.fromString("0df2f094-721a-4ad9-946a-34d523d5ee10"))
+                    .setResult(5L)
+                    .setCause(IllegalArgumentException.class)
+                    .setCauseMessage("task not found. id=0df2f094-721a-4ad9-946a-34d523d5ee10"));
+        }
+
+        @Test
+        public void test() {
+            try {
+                /*
+                 * テスト実行
+                 */
+                this.taskService.delete(this.param.id);
+
+                /*
+                 * テスト結果検証
+                 */
+                // NGケースなのに正常終了した場合、失敗
+                if (this.param.cause != null) {
+                    fail();
+                }
+
+                // データ件数を検証
+                assertThat(this.taskRepo.count(), is(this.param.result));
+            } catch (Exception e) {
+                // 例外がスローされたのにNG期待値がない場合、失敗
+                if (this.param.cause == null) {
+                    e.printStackTrace();
+                    fail();
+                }
+
+                // 例外内容を検証
+                assertThat(e.getClass().getName(), is(this.param.cause.getName()));
+                assertThat(e.getMessage(), is(this.param.causeMessage));
+
+                // データ件数を検証
+                assertThat(this.taskRepo.count(), is(this.param.result));
+            }
+        }
+
+    }
+
+    @RunWith(Parameterized.class)
+    @SpringBootTest
     public static class findByDate {
 
         @Autowired

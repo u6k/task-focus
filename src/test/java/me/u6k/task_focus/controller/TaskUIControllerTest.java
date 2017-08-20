@@ -156,4 +156,50 @@ public class TaskUIControllerTest {
 
     }
 
+    @RunWith(SpringRunner.class)
+    @SpringBootTest
+    @AutoConfigureMockMvc
+    public static class delete {
+
+        @Autowired
+        private MockMvc mvc;
+
+        @Autowired
+        private TaskService taskService;
+
+        @Autowired
+        private TaskRepository taskRepo;
+
+        private UUID task1Id;
+
+        private UUID task2Id;
+
+        private UUID task3Id;
+
+        @Before
+        public void setup() {
+            this.taskRepo.deleteAllInBatch();
+
+            this.task1Id = this.taskService.create(new Date(), "テスト作業1", 0, null);
+            this.task2Id = this.taskService.create(new Date(), "テスト作業2", 0, null);
+            this.task3Id = this.taskService.create(new Date(), "テスト作業3", 0, null);
+        }
+
+        @Test
+        public void 作業を削除() throws Exception {
+            // 事前条件を確認
+            assertThat(this.taskRepo.count(), is(3L));
+
+            // テスト実行
+            ResultActions result = this.mvc.perform(post("/ui/tasks/" + this.task1Id + "/delete"));
+
+            // テスト結果検証
+            result.andExpect(status().isFound())
+                .andExpect(redirectedUrl("/ui/tasks"));
+        }
+
+        // FIXME テストを追加する
+
+    }
+
 }

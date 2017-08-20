@@ -144,4 +144,17 @@ public class TaskUIController {
         return "redirect:/ui/tasks";
     }
 
+    @RequestMapping(value = "/ui/tasks/{id}/delete", method = RequestMethod.POST)
+    public String delete(@PathVariable String id) {
+        L.debug("delete: id={}", id);
+
+        UUID taskId = UUID.fromString(id);
+
+        this.taskService.delete(taskId);
+        L.debug("taskService.delete: success");
+
+        L.debug("return");
+        return "redirect:/ui/tasks";
+    }
+
 }
