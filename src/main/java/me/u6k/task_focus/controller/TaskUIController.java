@@ -37,8 +37,8 @@ public class TaskUIController {
     }
 
     @RequestMapping(value = "/ui/tasks", method = RequestMethod.GET)
-    public String list(Model model) {
-        L.debug("#list: model={}", model);
+    public String list(@ModelAttribute("form") TaskAddVO form, Model model) {
+        L.debug("#list: form={}, model={}", form, model);
 
         Date date = new Date();
         List<Task> taskList = this.taskService.findByDate(date);
@@ -48,43 +48,40 @@ public class TaskUIController {
         model.addAttribute("taskList", taskList);
         L.debug("setup model: model={}", model);
 
+        form.setDate(date);
+        L.debug("setup form: form={}", form);
+
         L.debug("return");
         return "tasks";
     }
 
-    @RequestMapping(value = "/ui/tasks/add", method = RequestMethod.GET)
-    public String addInit(@ModelAttribute("form") TaskVO form, Model model) {
-        L.debug("#addInit: form={}, model={}", form, model);
-
-        form.setDate(new Date());
-        L.debug("setup form: form={}", form);
-
-        L.debug("return");
-        return "tasks-add";
-    }
-
     @RequestMapping(value = "/ui/tasks/add", method = RequestMethod.POST)
-    public String add(@Validated @ModelAttribute("form") TaskVO form, BindingResult result, Model model) {
+    public String add(@Validated @ModelAttribute("form") TaskAddVO form, BindingResult result, Model model) {
         L.debug("add: form={}, result={}, model={}", form, result, model);
+
+        Date date = form.getDate();
+        List<Task> taskList = this.taskService.findByDate(date);
+        L.debug("taskService.findByDate: taskList={}", taskList);
+
+        model.addAttribute("date", date);
+        model.addAttribute("taskList", taskList);
+        L.debug("setup model: model={}", model);
 
         L.debug("validate: hasErrors={}", result.hasErrors());
         if (result.hasErrors()) {
             L.debug("return");
-            return "tasks-add";
+            return "tasks";
         }
 
         try {
-            this.taskService.create(form.getDate(),
-                form.getName(),
-                form.getEstimatedTime(),
-                form.getDate() != null ? DateUtil.toDatetime(form.getDate(), form.getEstimatedStartTime()) : null);
+            this.taskService.create(form.getDate(), form.getName(), 0, null);
             L.debug("taskService.create: success");
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
             L.debug("setup model: model={}", model);
 
             L.debug("return");
-            return "tasks-add";
+            return "tasks";
         }
 
         L.debug("return");
