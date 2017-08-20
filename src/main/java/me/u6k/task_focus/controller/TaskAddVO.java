@@ -9,10 +9,9 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hibernate.validator.constraints.NotBlank;
-import org.hibernate.validator.constraints.Range;
 import org.springframework.format.annotation.DateTimeFormat;
 
-public class TaskVO {
+public class TaskAddVO {
 
     @NotNull
     @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -21,14 +20,7 @@ public class TaskVO {
     @NotBlank
     private String name;
 
-    @NotNull
-    @Range(min = 0)
-    private int estimatedTime;
-
-    @DateTimeFormat(pattern = "HH:mm")
-    private Date estimatedStartTime;
-
-    public TaskVO() {
+    public TaskAddVO() {
     }
 
     @Override
@@ -60,22 +52,6 @@ public class TaskVO {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public int getEstimatedTime() {
-        return estimatedTime;
-    }
-
-    public void setEstimatedTime(int estimatedTime) {
-        this.estimatedTime = estimatedTime;
-    }
-
-    public Date getEstimatedStartTime() {
-        return estimatedStartTime;
-    }
-
-    public void setEstimatedStartTime(Date estimatedStartTime) {
-        this.estimatedStartTime = estimatedStartTime;
     }
 
 }

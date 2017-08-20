@@ -100,9 +100,7 @@ public class TaskUIControllerTest {
             // テスト実行
             ResultActions result = this.mvc.perform(post("/ui/tasks/add")
                 .param("date", "2017-08-15")
-                .param("name", "本を読む")
-                .param("estimatedTime", "60")
-                .param("estimatedStartTime", ""));
+                .param("name", "本を読む"));
 
             // テスト結果検証
             result.andExpect(status().isFound())

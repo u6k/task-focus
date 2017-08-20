@@ -17,7 +17,9 @@ body {
     <nav th:replace="navigation :: nav"></nav>
     <div class="container-fluid">
         <h1 class="page-header">Tasks</h1>
-        <h2>作業日: <span th:text="${#dates.format(date, 'yyyy-MM-dd')}">2017-08-15</span></h2>
+        <h2>
+            作業日: <span th:text="${#dates.format(date, 'yyyy-MM-dd')}">2017-08-15</span>
+        </h2>
         <table class="table">
             <thead>
                 <tr>
@@ -38,6 +40,14 @@ body {
                 </tr>
             </tbody>
         </table>
+        <div class="alert alert-danger" role="alert" th:if="${error}" th:text="${error}">エラー</div>
+        <form role="form" action="tasks.html" method="post" th:action="@{/ui/tasks/add}" th:object="${form}">
+            <input type="hidden" id="date" name="date" th:field="*{date}"></input>
+            <div class="form-group has-error" th:class="${#fields.hasErrors('name')}? 'form-group has-error' : 'form-group'">
+                <label for="name">追加する作業名</label><input type="text" class="form-control" id="name" name="name" placeholder="本を読む" th:field="*{name}"></input><span class="help-block" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">error</span>
+            </div>
+            <button type="submit" class="btn btn-success">Add</button>
+        </form>
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
