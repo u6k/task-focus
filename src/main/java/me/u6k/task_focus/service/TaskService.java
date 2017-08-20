@@ -89,6 +89,31 @@ public class TaskService {
         L.debug("taskRepo.save: success");
     }
 
+    public void delete(UUID id) {
+        L.debug("#delete: id={}", id);
+
+        /*
+         * 入力チェック
+         */
+        if (id == null) {
+            throw new IllegalArgumentException("id is null.");
+        }
+
+        /*
+         * タスクを検索
+         */
+        Task task = this.taskRepo.findOne(id);
+        if (task == null) {
+            throw new IllegalArgumentException("task not found. id=" + id);
+        }
+
+        /*
+         * タスクを削除
+         */
+        this.taskRepo.delete(task);
+        L.debug("taskRepo.delete: success");
+    }
+
     public List<Task> findByDate(Date date) {
         L.debug("#findByDate: date={}", date);
 

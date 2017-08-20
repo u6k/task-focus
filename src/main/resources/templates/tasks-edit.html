@@ -18,7 +18,7 @@ body {
     <div class="container-fluid">
         <h1 class="page-header">Edit Task</h1>
         <div class="alert alert-danger" role="alert" th:if="${error}" th:text="${error}">エラー</div>
-        <form role="form" action="tasks-edit.html" method="post" th:action="@{'/ui/tasks/'+${id}+'/edit'}" th:object="${form}">
+        <form role="form" action="tasks.html" method="post" th:action="@{'/ui/tasks/'+${id}+'/edit'}" th:object="${form}">
             <div class="form-group" th:class="${#fields.hasErrors('date')}? 'form-group has-error' : 'form-group'">
                 <label for="date">作業日</label> <input type="text" class="form-control" id="date" name="date" placeholder="2017/03/23" th:field="*{date}"></input><span class="help-block" th:if="${#fields.hasErrors('date')}" th:errors="*{date}"></span>
             </div>
@@ -37,7 +37,14 @@ body {
             <div class="form-group has-error" th:class="${#fields.hasErrors('endTime')}? 'form-group has-error' : 'form-group'">
                 <label for="endTime">終了時刻</label><input type="text" class="form-control" id="endTime" name="endTime" placeholder="14:00" th:field="*{endTime}"></input><span class="help-block" th:if="${#fields.hasErrors('endTime')}" th:errors="*{endTime}">error</span>
             </div>
-            <button type="submit" class="btn btn-default">Update</button>
+            <div class="form-group">
+                <button type="submit" class="btn btn-success">Update</button>
+            </div>
+        </form>
+        <form role="form" action="tasks.html" method="post" th:action="@{'/ui/tasks/'+${id}+'/delete'}">
+            <div class="form-group">
+                <button type="submit" class="btn btn-danger">Delete</button>
+            </div>
         </form>
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
