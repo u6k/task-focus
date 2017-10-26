@@ -138,6 +138,7 @@ $ docker build -t task-focus .
 ```
 $ docker run \
     -p 8080:8080 \
+    -v ${HOME}/volumes/task-focus:/var/task-focus \
     task-focus
 ```
 
