@@ -32,7 +32,7 @@ body {
             </thead>
             <tbody>
                 <tr th:each="task : ${taskList}">
-                    <td><a href="/ui/tasks/xxxxx-xx-xx-xx-xxxx/edit" th:text="${task.name}" th:href="@{'/ui/tasks/'+${task.id}+'/edit'}">テスト作業1</a></td>
+                    <td><a href="/ui/tasks/xxxxx-xx-xx-xx-xxxx/update" th:text="${task.name}" th:href="@{'/ui/tasks/'+${task.id}+'/update'}">テスト作業1</a></td>
                     <td th:text="${task.estimatedStartTime} ? ${#dates.format(task.estimatedStartTime, 'HH:mm')} : ''">13:00</td>
                     <td th:text="${task.estimatedTime}">1.0</td>
                     <td th:text="${task.startTime} ? ${#dates.format(task.startTime, 'HH:mm')} : ''">13:00</td>

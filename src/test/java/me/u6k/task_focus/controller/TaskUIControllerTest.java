@@ -119,7 +119,7 @@ public class TaskUIControllerTest {
     @RunWith(SpringRunner.class)
     @SpringBootTest
     @AutoConfigureMockMvc
-    public static class edit {
+    public static class update {
 
         @Autowired
         private MockMvc mvc;
@@ -142,7 +142,7 @@ public class TaskUIControllerTest {
         @Test
         public void 初期表示() throws Exception {
             // テスト実行
-            ResultActions result = this.mvc.perform(get("/ui/tasks/" + this.task1id + "/edit"));
+            ResultActions result = this.mvc.perform(get("/ui/tasks/" + this.task1id + "/update"));
 
             // テスト結果検証
             result.andExpect(status().isOk());

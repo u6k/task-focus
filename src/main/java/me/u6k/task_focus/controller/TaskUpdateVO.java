@@ -12,7 +12,7 @@ import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.Range;
 import org.springframework.format.annotation.DateTimeFormat;
 
-public class TaskEditVO {
+public class TaskUpdateVO {
 
     @NotNull
     @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -34,7 +34,7 @@ public class TaskEditVO {
     @DateTimeFormat(pattern = "HH:mm")
     private Date endTime;
 
-    public TaskEditVO() {
+    public TaskUpdateVO() {
     }
 
     @Override

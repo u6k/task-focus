@@ -88,9 +88,9 @@ public class TaskUIController {
         return "redirect:/ui/tasks";
     }
 
-    @RequestMapping(value = "/ui/tasks/{id}/edit", method = RequestMethod.GET)
-    public String editInit(@PathVariable String id, @ModelAttribute("form") TaskEditVO form, Model model) {
-        L.debug("#editInit: id={}, form={}, model={}", id, form, model);
+    @RequestMapping(value = "/ui/tasks/{id}/update", method = RequestMethod.GET)
+    public String updateInit(@PathVariable String id, @ModelAttribute("form") TaskUpdateVO form, Model model) {
+        L.debug("#updateInit: id={}, form={}, model={}", id, form, model);
 
         Task task = this.taskService.findById(UUID.fromString(id));
         form.setDate(task.getDate());
@@ -105,17 +105,17 @@ public class TaskUIController {
         L.debug("setup model: model={}", model);
 
         L.debug("return");
-        return "tasks-edit";
+        return "tasks-update";
     }
 
-    @RequestMapping(value = "/ui/tasks/{id}/edit", method = RequestMethod.POST)
-    public String edit(@PathVariable String id, @Validated @ModelAttribute("form") TaskEditVO form, BindingResult result, Model model) {
-        L.debug("edit: id={}, form={}, result={}, model={}", id, form, result, model);
+    @RequestMapping(value = "/ui/tasks/{id}/update", method = RequestMethod.POST)
+    public String update(@PathVariable String id, @Validated @ModelAttribute("form") TaskUpdateVO form, BindingResult result, Model model) {
+        L.debug("update: id={}, form={}, result={}, model={}", id, form, result, model);
 
         L.debug("validate: hasErrors={}", result.hasErrors());
         if (result.hasErrors()) {
             L.debug("return");
-            return "tasks-edit";
+            return "tasks-update";
         }
 
         try {
@@ -128,13 +128,13 @@ public class TaskUIController {
                 form.getDate() != null ? DateUtil.toDatetime(form.getDate(), form.getEstimatedStartTime()) : null,
                 form.getDate() != null ? DateUtil.toDatetime(form.getDate(), form.getStartTime()) : null,
                 form.getDate() != null ? DateUtil.toDatetime(form.getDate(), form.getEndTime()) : null);
-            L.debug("taskService.edit: success");
+            L.debug("taskService.update: success");
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
             L.debug("setup model: model={}", model);
 
             L.debug("return");
-            return "tasks-edit";
+            return "tasks-update";
         }
 
         L.debug("return");
