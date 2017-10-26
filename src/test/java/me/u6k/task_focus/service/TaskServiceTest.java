@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -19,6 +20,7 @@ import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -26,6 +28,8 @@ import org.springframework.test.context.TestContextManager;
 
 @RunWith(Enclosed.class)
 public class TaskServiceTest {
+
+    // TODO: DB初期化、比較はDBUnitで実施する
 
     @RunWith(Parameterized.class)
     @SpringBootTest
@@ -37,12 +41,6 @@ public class TaskServiceTest {
         @Autowired
         private TaskRepository taskRepo;
 
-        private AddTestParameter param;
-
-        public add(AddTestParameter param) {
-            this.param = param;
-        }
-
         @Before
         public void setup() throws Exception {
             new TestContextManager(this.getClass()).prepareTestInstance(this);
@@ -53,159 +51,165 @@ public class TaskServiceTest {
             this.taskRepo.deleteAllInBatch();
         }
 
-        public static class AddTestParameter {
-
-            String testName;
-
-            Date date;
-
-            String name;
-
-            int estimatedTime;
-
-            Date estimatedStartTime;
-
-            Task result;
-
-            Class<? extends Throwable> cause;
-
-            String causeMessage;
-
-            AddTestParameter(String testName) {
-                this.testName = testName;
-            }
-
-            @Override
-            public String toString() {
-                return this.testName;
-            }
-
-            AddTestParameter setDate(Date date) {
-                this.date = date;
-                return this;
-            }
-
-            AddTestParameter setName(String name) {
-                this.name = name;
-                return this;
-            }
-
-            AddTestParameter setEstimatedTime(int estimatedTime) {
-                this.estimatedTime = estimatedTime;
-                return this;
-            }
-
-            AddTestParameter setEstimatedStartTime(Date estimatedStartTime) {
-                this.estimatedStartTime = estimatedStartTime;
-                return this;
-            }
-
-            AddTestParameter setResult(Task result) {
-                this.result = result;
-                return this;
-            }
-
-            AddTestParameter setCause(Class<? extends Throwable> cause) {
-                this.cause = cause;
-                return this;
-            }
-
-            AddTestParameter setCauseMessage(String causeMessage) {
-                this.causeMessage = causeMessage;
-                return this;
-            }
-
-        }
-
         @Parameters(name = "{0}")
-        public static Iterable<AddTestParameter> getParameters() throws Exception {
-            return Arrays.asList(
-                new AddTestParameter("OK: 登録できる")
-                    .setDate(DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"))
-                    .setName("テスト作業")
-                    .setEstimatedTime(60)
-                    .setEstimatedStartTime(null)
-                    .setResult(new Task(null, DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"), 0, "テスト作業", 60, null, null, null)),
-                new AddTestParameter("OK: dateの時分秒ミリ秒がリセットされる")
-                    .setDate(DateUtil.parseFullDatetime("2017-08-17 23:45:56.987"))
-                    .setName("テスト作業")
-                    .setEstimatedTime(60)
-                    .setEstimatedStartTime(null)
-                    .setResult(new Task(null, DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"), 0, "テスト作業", 60, null, null, null)),
-                new AddTestParameter("NG: dateがnull")
-                    .setDate(null)
-                    .setName("テスト作業")
-                    .setEstimatedTime(60)
-                    .setEstimatedStartTime(null)
-                    .setCause(IllegalStateException.class)
-                    .setCauseMessage("task.date is null."),
-                new AddTestParameter("NG: nameがnull")
-                    .setDate(DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"))
-                    .setName(null)
-                    .setEstimatedTime(60)
-                    .setEstimatedStartTime(null)
-                    .setCause(IllegalStateException.class)
-                    .setCauseMessage("task.name is blank."),
-                new AddTestParameter("NG: nameが空文字列")
-                    .setDate(DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"))
-                    .setName("")
-                    .setEstimatedTime(60)
-                    .setEstimatedStartTime(null)
-                    .setCause(IllegalStateException.class)
-                    .setCauseMessage("task.name is blank."),
-                new AddTestParameter("NG: nameが空白文字")
-                    .setDate(DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"))
-                    .setName(" ")
-                    .setEstimatedTime(60)
-                    .setEstimatedStartTime(null)
-                    .setCause(IllegalStateException.class)
-                    .setCauseMessage("task.name is blank."),
-                new AddTestParameter("OK: nameの前後に空白文字")
-                    .setDate(DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"))
-                    .setName("     テスト作業    ")
-                    .setEstimatedTime(60)
-                    .setEstimatedStartTime(null)
-                    .setResult(new Task(null, DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"), 0, "テスト作業", 60, null, null, null)),
-                new AddTestParameter("NG: estimatedTimeがマイナス")
-                    .setDate(DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"))
-                    .setName("テスト作業")
-                    .setEstimatedTime(-1)
-                    .setEstimatedStartTime(null)
-                    .setCause(IllegalStateException.class)
-                    .setCauseMessage("task.estimatedTime < 0"),
-                new AddTestParameter("OK: estimatedTimeが0")
-                    .setDate(DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"))
-                    .setName("テスト作業")
-                    .setEstimatedTime(0)
-                    .setEstimatedStartTime(null)
-                    .setResult(new Task(null, DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"), 0, "テスト作業", 0, null, null, null)),
-                new AddTestParameter("NG: estimatedStartTimeがdateの前日")
-                    .setDate(DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"))
-                    .setName("テスト作業")
-                    .setEstimatedTime(0)
-                    .setEstimatedStartTime(DateUtil.parseFullDatetime("2017-08-16 23:59:59.999"))
-                    .setCause(IllegalStateException.class)
-                    .setCauseMessage("task.date and task.estimatedStartTime is not same day."),
-                new AddTestParameter("OK: estimatedStartTimeとdateが同日(1)")
-                    .setDate(DateUtil.parseFullDatetime("2017-08-17 23:45:56.987"))
-                    .setName("テスト作業")
-                    .setEstimatedTime(0)
-                    .setEstimatedStartTime(DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"))
-                    .setResult(new Task(null, DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"), 0, "テスト作業", 0, DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"), null, null)),
-                new AddTestParameter("OK: estimatedStartTimeとdateが同日(2)")
-                    .setDate(DateUtil.parseFullDatetime("2017-08-17 23:45:56.987"))
-                    .setName("テスト作業")
-                    .setEstimatedTime(0)
-                    .setEstimatedStartTime(DateUtil.parseFullDatetime("2017-08-17 23:59:59.999"))
-                    .setResult(new Task(null, DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"), 0, "テスト作業", 0, DateUtil.parseFullDatetime("2017-08-17 23:59:59.999"), null, null)),
-                new AddTestParameter("NG: estimatedStartTimeがdateの翌日")
-                    .setDate(DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"))
-                    .setName("テスト作業")
-                    .setEstimatedTime(0)
-                    .setEstimatedStartTime(DateUtil.parseFullDatetime("2017-08-18 00:00:00.000"))
-                    .setCause(IllegalStateException.class)
-                    .setCauseMessage("task.date and task.estimatedStartTime is not same day."));
+        public static Collection<Object[]> parameters() {
+            return Arrays.asList(new Object[][] {
+                {
+                    "OK: 登録できる",
+                    DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"),
+                    "テスト作業",
+                    60,
+                    null,
+                    new Task(null, DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"), 0, "テスト作業", 60, null, null, null),
+                    null,
+                    null
+                },
+                {
+                    "OK: dateの時分秒ミリ秒がリセットされる",
+                    DateUtil.parseFullDatetime("2017-08-17 23:45:56.987"),
+                    "テスト作業",
+                    60,
+                    null,
+                    new Task(null, DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"), 0, "テスト作業", 60, null, null, null),
+                    null,
+                    null
+                },
+                {
+                    "NG: dateがnull",
+                    null,
+                    "テスト作業",
+                    60,
+                    null,
+                    null,
+                    IllegalStateException.class,
+                    "task.date is null."
+                },
+                {
+                    "NG: nameがnull",
+                    DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"),
+                    null,
+                    60,
+                    null,
+                    null,
+                    IllegalStateException.class,
+                    "task.name is blank."
+                },
+                {
+                    "NG: nameが空文字列",
+                    DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"),
+                    "",
+                    60,
+                    null,
+                    null,
+                    IllegalStateException.class,
+                    "task.name is blank."
+                },
+                {
+                    "NG: nameが空白文字",
+                    DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"),
+                    " ",
+                    60,
+                    null,
+                    null,
+                    IllegalStateException.class,
+                    "task.name is blank.",
+                },
+                {
+                    "OK: nameの前後に空白文字",
+                    DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"),
+                    "     テスト作業    ",
+                    60,
+                    null,
+                    new Task(null, DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"), 0, "テスト作業", 60, null, null, null),
+                    null,
+                    null
+                },
+                {
+                    "NG: estimatedTimeがマイナス",
+                    DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"),
+                    "テスト作業",
+                    -1,
+                    null,
+                    null,
+                    IllegalStateException.class,
+                    "task.estimatedTime < 0"
+                },
+                {
+                    "OK: estimatedTimeが0",
+                    DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"),
+                    "テスト作業",
+                    0,
+                    null,
+                    new Task(null, DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"), 0, "テスト作業", 0, null, null, null),
+                    null,
+                    null
+                },
+                {
+                    "NG: estimatedStartTimeがdateの前日",
+                    DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"),
+                    "テスト作業",
+                    0,
+                    DateUtil.parseFullDatetime("2017-08-16 23:59:59.999"),
+                    null,
+                    IllegalStateException.class,
+                    "task.date and task.estimatedStartTime is not same day."
+                },
+                {
+                    "OK: estimatedStartTimeとdateが同日(1)",
+                    DateUtil.parseFullDatetime("2017-08-17 23:45:56.987"),
+                    "テスト作業",
+                    0,
+                    DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"),
+                    new Task(null, DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"), 0, "テスト作業", 0, DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"), null, null),
+                    null,
+                    null
+                },
+                {
+                    "OK: estimatedStartTimeとdateが同日(2)",
+                    DateUtil.parseFullDatetime("2017-08-17 23:45:56.987"),
+                    "テスト作業",
+                    0,
+                    DateUtil.parseFullDatetime("2017-08-17 23:59:59.999"),
+                    new Task(null, DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"), 0, "テスト作業", 0, DateUtil.parseFullDatetime("2017-08-17 23:59:59.999"), null, null),
+                    null,
+                    null
+                },
+                {
+                    "NG: estimatedStartTimeがdateの翌日",
+                    DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"),
+                    "テスト作業",
+                    0,
+                    DateUtil.parseFullDatetime("2017-08-18 00:00:00.000"),
+                    null,
+                    IllegalStateException.class,
+                    "task.date and task.estimatedStartTime is not same day."
+                }
+            });
         }
+
+        @Parameter(0)
+        public String testName;
+
+        @Parameter(1)
+        public Date date;
+
+        @Parameter(2)
+        public String name;
+
+        @Parameter(3)
+        public int estimatedTime;
+
+        @Parameter(4)
+        public Date estimatedStartTime;
+
+        @Parameter(5)
+        public Task result;
+
+        @Parameter(6)
+        public Class<? extends Throwable> cause;
+
+        @Parameter(7)
+        public String causeMessage;
 
         @Test
         public void test() {
@@ -213,16 +217,16 @@ public class TaskServiceTest {
                 /*
                  * テスト実行
                  */
-                UUID id = this.taskService.add(this.param.date,
-                    this.param.name,
-                    this.param.estimatedTime,
-                    this.param.estimatedStartTime);
+                UUID id = this.taskService.add(this.date,
+                    this.name,
+                    this.estimatedTime,
+                    this.estimatedStartTime);
 
                 /*
                  * テスト結果検証
                  */
                 // NGケースなのに正常終了した場合、失敗
-                if (this.param.cause != null) {
+                if (this.cause != null) {
                     fail();
                 }
 
@@ -233,26 +237,26 @@ public class TaskServiceTest {
                 Task task = this.taskRepo.findOne(id);
                 assertThat(task.getId(), is(id));
                 assertThat(task.getDate() != null ? task.getDate().getTime() : null,
-                    is(this.param.result.getDate() != null ? this.param.result.getDate().getTime() : null));
-                assertThat(task.getOrderOfDate(), is(this.param.result.getOrderOfDate()));
-                assertThat(task.getName(), is(this.param.result.getName()));
-                assertThat(task.getEstimatedTime(), is(this.param.result.getEstimatedTime()));
+                    is(this.result.getDate() != null ? this.result.getDate().getTime() : null));
+                assertThat(task.getOrderOfDate(), is(this.result.getOrderOfDate()));
+                assertThat(task.getName(), is(this.result.getName()));
+                assertThat(task.getEstimatedTime(), is(this.result.getEstimatedTime()));
                 assertThat(task.getEstimatedStartTime() != null ? task.getEstimatedStartTime().getTime() : null,
-                    is(this.param.result.getEstimatedStartTime() != null ? this.param.result.getEstimatedStartTime().getTime() : null));
+                    is(this.result.getEstimatedStartTime() != null ? this.result.getEstimatedStartTime().getTime() : null));
                 assertThat(task.getStartTime() != null ? task.getStartTime().getTime() : null,
-                    is(this.param.result.getStartTime() != null ? this.param.result.getStartTime().getTime() : null));
+                    is(this.result.getStartTime() != null ? this.result.getStartTime().getTime() : null));
                 assertThat(task.getEndTime() != null ? task.getEndTime().getTime() : null,
-                    is(this.param.result.getEndTime() != null ? this.param.result.getEndTime().getTime() : null));
+                    is(this.result.getEndTime() != null ? this.result.getEndTime().getTime() : null));
             } catch (Exception e) {
                 // 例外がスローされたのにNG期待値がない場合、失敗
-                if (this.param.cause == null) {
+                if (this.cause == null) {
                     e.printStackTrace();
                     fail();
                 }
 
                 // 例外内容を検証
-                assertThat(e.getClass().getName(), is(this.param.cause.getName()));
-                assertThat(e.getMessage(), is(this.param.causeMessage));
+                assertThat(e.getClass().getName(), is(this.cause.getName()));
+                assertThat(e.getMessage(), is(this.causeMessage));
 
                 // データ件数を検証
                 assertThat(this.taskRepo.count(), is(0L));
@@ -270,22 +274,6 @@ public class TaskServiceTest {
 
         @Autowired
         private TaskRepository taskRepo;
-
-        private UpdateTestParameter param;
-
-        private Task task1;
-
-        private Task task2;
-
-        private Task task3;
-
-        private Task task4;
-
-        private Task task5;
-
-        public update(UpdateTestParameter param) {
-            this.param = param;
-        }
 
         @Before
         public void setup() throws Exception {
@@ -316,109 +304,71 @@ public class TaskServiceTest {
             this.task5 = this.taskRepo.findOne(id);
         }
 
-        public static class UpdateTestParameter {
-
-            String testName;
-
-            Date date;
-
-            String name;
-
-            int estimatedTime;
-
-            Date estimatedStartTime;
-
-            Date startTime;
-
-            Date endTime;
-
-            Task result;
-
-            Class<? extends Throwable> cause;
-
-            String causeMessage;
-
-            UpdateTestParameter(String testName) {
-                this.testName = testName;
-            }
-
-            @Override
-            public String toString() {
-                return this.testName;
-            }
-
-            public UpdateTestParameter setTestName(String testName) {
-                this.testName = testName;
-                return this;
-            }
-
-            public UpdateTestParameter setDate(Date date) {
-                this.date = date;
-                return this;
-            }
-
-            public UpdateTestParameter setName(String name) {
-                this.name = name;
-                return this;
-            }
-
-            public UpdateTestParameter setEstimatedTime(int estimatedTime) {
-                this.estimatedTime = estimatedTime;
-                return this;
-            }
-
-            public UpdateTestParameter setEstimatedStartTime(Date estimatedStartTime) {
-                this.estimatedStartTime = estimatedStartTime;
-                return this;
-            }
-
-            public UpdateTestParameter setStartTime(Date startTime) {
-                this.startTime = startTime;
-                return this;
-            }
-
-            public UpdateTestParameter setEndTime(Date endTime) {
-                this.endTime = endTime;
-                return this;
-            }
-
-            public UpdateTestParameter setResult(Task result) {
-                this.result = result;
-                return this;
-            }
-
-            public UpdateTestParameter setCause(Class<? extends Throwable> cause) {
-                this.cause = cause;
-                return this;
-            }
-
-            public UpdateTestParameter setCauseMessage(String causeMessage) {
-                this.causeMessage = causeMessage;
-                return this;
-            }
-
-        }
-
         @Parameters(name = "{0}")
-        public static Iterable<UpdateTestParameter> getParameters() throws Exception {
-            return Arrays.asList(
-                new UpdateTestParameter("OK: 更新できる")
-                    .setDate(DateUtil.parseFullDatetime("2017-08-11 01:02:03.456"))
-                    .setName("テスト作業 - 更新済み")
-                    .setEstimatedTime(123)
-                    .setEstimatedStartTime(DateUtil.parseFullDatetime("2017-08-11 02:03:04.567"))
-                    .setStartTime(DateUtil.parseFullDatetime("2017-08-11 03:04:05.678"))
-                    .setEndTime(DateUtil.parseFullDatetime("2017-08-11 23:59:59.999"))
-                    .setResult(new Task(null,
+        public static Collection<Object[]> parameters() {
+            return Arrays.asList(new Object[][] {
+                {
+                    "OK: 更新できる",
+                    DateUtil.parseFullDatetime("2017-08-11 01:02:03.456"),
+                    "テスト作業 - 更新済み",
+                    123,
+                    DateUtil.parseFullDatetime("2017-08-11 02:03:04.567"),
+                    DateUtil.parseFullDatetime("2017-08-11 03:04:05.678"),
+                    DateUtil.parseFullDatetime("2017-08-11 23:59:59.999"),
+                    new Task(null,
                         DateUtil.parseFullDatetime("2017-08-11 00:00:00.000"),
                         0,
                         "テスト作業 - 更新済み",
                         123,
                         DateUtil.parseFullDatetime("2017-08-11 02:03:04.567"),
                         DateUtil.parseFullDatetime("2017-08-11 03:04:05.678"),
-                        DateUtil.parseFullDatetime("2017-08-11 23:59:59.999"))));
+                        DateUtil.parseFullDatetime("2017-08-11 23:59:59.999")),
+                    null,
+                    null
+                }
+            });
             // FIXME: テストを追加
         }
+
+        private Task task1;
+
+        private Task task2;
+
+        private Task task3;
+
+        private Task task4;
+
+        private Task task5;
+
+        @Parameter(0)
+        public String testName;
+
+        @Parameter(1)
+        public Date date;
+
+        @Parameter(2)
+        public String name;
+
+        @Parameter(3)
+        public int estimatedTime;
+
+        @Parameter(4)
+        public Date estimatedStartTime;
+
+        @Parameter(5)
+        public Date startTime;
+
+        @Parameter(6)
+        public Date endTime;
+
+        @Parameter(7)
+        public Task result;
+
+        @Parameter(8)
+        public Class<? extends Throwable> cause;
+
+        @Parameter(9)
+        public String causeMessage;
 
         @Test
         public void test() {
@@ -427,18 +377,18 @@ public class TaskServiceTest {
                  * テスト実行
                  */
                 this.taskService.update(this.task1.getId(),
-                    this.param.date,
-                    this.param.name,
-                    this.param.estimatedTime,
-                    this.param.estimatedStartTime,
-                    this.param.startTime,
-                    this.param.endTime);
+                    this.date,
+                    this.name,
+                    this.estimatedTime,
+                    this.estimatedStartTime,
+                    this.startTime,
+                    this.endTime);
 
                 /*
                  * テスト結果検証
                  */
                 // NGケースなのに正常終了した場合、失敗
-                if (this.param.cause != null) {
+                if (this.cause != null) {
                     fail();
                 }
 
@@ -448,16 +398,16 @@ public class TaskServiceTest {
                 // データ内容を検証
                 Task task = this.taskRepo.findOne(this.task1.getId());
                 assertThat(task.getDate() != null ? task.getDate().getTime() : null,
-                    is(this.param.result.getDate() != null ? this.param.result.getDate().getTime() : null));
-                assertThat(task.getOrderOfDate(), is(this.param.result.getOrderOfDate()));
-                assertThat(task.getName(), is(this.param.result.getName()));
-                assertThat(task.getEstimatedTime(), is(this.param.result.getEstimatedTime()));
+                    is(this.result.getDate() != null ? this.result.getDate().getTime() : null));
+                assertThat(task.getOrderOfDate(), is(this.result.getOrderOfDate()));
+                assertThat(task.getName(), is(this.result.getName()));
+                assertThat(task.getEstimatedTime(), is(this.result.getEstimatedTime()));
                 assertThat(task.getEstimatedStartTime() != null ? task.getEstimatedStartTime().getTime() : null,
-                    is(this.param.result.getEstimatedStartTime() != null ? this.param.result.getEstimatedStartTime().getTime() : null));
+                    is(this.result.getEstimatedStartTime() != null ? this.result.getEstimatedStartTime().getTime() : null));
                 assertThat(task.getStartTime() != null ? task.getStartTime().getTime() : null,
-                    is(this.param.result.getStartTime() != null ? this.param.result.getStartTime().getTime() : null));
+                    is(this.result.getStartTime() != null ? this.result.getStartTime().getTime() : null));
                 assertThat(task.getEndTime() != null ? task.getEndTime().getTime() : null,
-                    is(this.param.result.getEndTime() != null ? this.param.result.getEndTime().getTime() : null));
+                    is(this.result.getEndTime() != null ? this.result.getEndTime().getTime() : null));
 
                 task = this.taskRepo.findOne(this.task2.getId());
                 assertThat(task, is(this.task2));
@@ -472,14 +422,14 @@ public class TaskServiceTest {
                 assertThat(task, is(this.task5));
             } catch (Exception e) {
                 // 例外がスローされたのにNG期待値がない場合、失敗
-                if (this.param.cause == null) {
+                if (this.cause == null) {
                     e.printStackTrace();
                     fail();
                 }
 
                 // 例外内容を検証
-                assertThat(e.getClass().getName(), is(this.param.cause.getName()));
-                assertThat(e.getMessage(), is(this.param.causeMessage));
+                assertThat(e.getClass().getName(), is(this.cause.getName()));
+                assertThat(e.getMessage(), is(this.causeMessage));
 
                 // データ件数を検証
                 assertThat(this.taskRepo.count(), is(5L));
@@ -514,22 +464,6 @@ public class TaskServiceTest {
         @Autowired
         private TaskRepository taskRepo;
 
-        private RemoveTestParameter param;
-
-        private Task task1;
-
-        private Task task2;
-
-        private Task task3;
-
-        private Task task4;
-
-        private Task task5;
-
-        public remove(RemoveTestParameter param) {
-            this.param = param;
-        }
-
         @Before
         public void setup() throws Exception {
             // DI準備
@@ -559,71 +493,57 @@ public class TaskServiceTest {
             this.taskRepo.save(this.task5);
         }
 
-        public static class RemoveTestParameter {
-
-            String testName;
-
-            UUID id;
-
-            long result;
-
-            Class<? extends Throwable> cause;
-
-            String causeMessage;
-
-            RemoveTestParameter(String testName) {
-                this.testName = testName;
-            }
-
-            @Override
-            public String toString() {
-                return this.testName;
-            }
-
-            public RemoveTestParameter setTestName(String testName) {
-                this.testName = testName;
-                return this;
-            }
-
-            public RemoveTestParameter setId(UUID id) {
-                this.id = id;
-                return this;
-            }
-
-            public RemoveTestParameter setResult(long result) {
-                this.result = result;
-                return this;
-            }
-
-            public RemoveTestParameter setCause(Class<? extends Throwable> cause) {
-                this.cause = cause;
-                return this;
-            }
-
-            public RemoveTestParameter setCauseMessage(String causeMessage) {
-                this.causeMessage = causeMessage;
-                return this;
-            }
-
-        }
-
         @Parameters(name = "{0}")
-        public static Iterable<RemoveTestParameter> getParameters() throws Exception {
-            return Arrays.asList(
-                new RemoveTestParameter("OK: 削除できる")
-                    .setId(UUID.fromString("ef089e3b-c51c-4dbf-aec4-0ebbfb00a5c0"))
-                    .setResult(4L),
-                new RemoveTestParameter("NG: idがnull")
-                    .setId(null)
-                    .setResult(5L)
-                    .setCause(IllegalArgumentException.class)
-                    .setCauseMessage("id is null."),
-                new RemoveTestParameter("NG: 作業が存在しない")
-                    .setId(UUID.fromString("0df2f094-721a-4ad9-946a-34d523d5ee10"))
-                    .setResult(5L)
-                    .setCause(IllegalArgumentException.class)
-                    .setCauseMessage("task not found. id=0df2f094-721a-4ad9-946a-34d523d5ee10"));
+        public static Collection<Object[]> parameters() {
+            return Arrays.asList(new Object[][] {
+                {
+                    "OK: 削除できる",
+                    UUID.fromString("ef089e3b-c51c-4dbf-aec4-0ebbfb00a5c0"),
+                    4L,
+                    null,
+                    null
+                },
+                {
+                    "NG: idがnull",
+                    null,
+                    5L,
+                    IllegalArgumentException.class,
+                    "id is null."
+                },
+                {
+                    "NG: 作業が存在しない",
+                    UUID.fromString("0df2f094-721a-4ad9-946a-34d523d5ee10"),
+                    5L,
+                    IllegalArgumentException.class,
+                    "task not found. id=0df2f094-721a-4ad9-946a-34d523d5ee10"
+                }
+            });
         }
+
+        private Task task1;
+
+        private Task task2;
+
+        private Task task3;
+
+        private Task task4;
+
+        private Task task5;
+
+        @Parameter(0)
+        public String testName;
+
+        @Parameter(1)
+        public UUID id;
+
+        @Parameter(2)
+        public long result;
+
+        @Parameter(3)
+        public Class<? extends Throwable> cause;
+
+        @Parameter(4)
+        public String causeMessage;
 
         @Test
         public void test() {
@@ -631,31 +551,31 @@ public class TaskServiceTest {
                 /*
                  * テスト実行
                  */
-                this.taskService.remove(this.param.id);
+                this.taskService.remove(this.id);
 
                 /*
                  * テスト結果検証
                  */
                 // NGケースなのに正常終了した場合、失敗
-                if (this.param.cause != null) {
+                if (this.cause != null) {
                     fail();
                 }
 
                 // データ件数を検証
-                assertThat(this.taskRepo.count(), is(this.param.result));
+                assertThat(this.taskRepo.count(), is(this.result));
             } catch (Exception e) {
                 // 例外がスローされたのにNG期待値がない場合、失敗
-                if (this.param.cause == null) {
+                if (this.cause == null) {
                     e.printStackTrace();
                     fail();
                 }
 
                 // 例外内容を検証
-                assertThat(e.getClass().getName(), is(this.param.cause.getName()));
-                assertThat(e.getMessage(), is(this.param.causeMessage));
+                assertThat(e.getClass().getName(), is(this.cause.getName()));
+                assertThat(e.getMessage(), is(this.causeMessage));
 
                 // データ件数を検証
-                assertThat(this.taskRepo.count(), is(this.param.result));
+                assertThat(this.taskRepo.count(), is(this.result));
             }
         }
 
@@ -670,12 +590,6 @@ public class TaskServiceTest {
 
         @Autowired
         private TaskRepository taskRepo;
-
-        private FindByDateTestParameter param;
-
-        public findByDate(FindByDateTestParameter param) {
-            this.param = param;
-        }
 
         @Before
         public void setup() throws Exception {
@@ -693,84 +607,87 @@ public class TaskServiceTest {
             this.taskService.add(DateUtil.parseFullDatetime("2017-08-14 00:00:00.000"), "テスト作業4", 0, null);
         }
 
-        public static class FindByDateTestParameter {
-
-            String testName;
-
-            boolean beforeCleanup = false;
-
-            Date date;
-
-            List<Task> result;
-
-            FindByDateTestParameter(String testName) {
-                this.testName = testName;
-            }
-
-            @Override
-            public String toString() {
-                return this.testName;
-            }
-
-            FindByDateTestParameter setBeforeCleanup(boolean beforeCleanup) {
-                this.beforeCleanup = beforeCleanup;
-                return this;
-            }
-
-            FindByDateTestParameter setDate(Date date) {
-                this.date = date;
-                return this;
-            }
-
-            FindByDateTestParameter setResult(List<Task> result) {
-                this.result = result;
-                return this;
-            }
-
-        }
-
         @Parameters(name = "{0}")
-        public static Iterable<FindByDateTestParameter> getParameters() throws Exception {
-            return Arrays.asList(
-                new FindByDateTestParameter("OK: データが0件")
-                    .setBeforeCleanup(true)
-                    .setDate(new Date())
-                    .setResult(Arrays.asList()),
-                new FindByDateTestParameter("OK: 2017/8/11のデータが0件")
-                    .setDate(DateUtil.parseFullDatetime("2017-08-11 23:59:59.999"))
-                    .setResult(Arrays.asList()),
-                new FindByDateTestParameter("OK: 2017/8/12のデータがヒット(1)")
-                    .setDate(DateUtil.parseFullDatetime("2017-08-12 00:00:00.000"))
-                    .setResult(Arrays.asList(
-                        new Task(null, DateUtil.parseFullDatetime("2017-08-12 00:00:00.000"), 0, "テスト作業0", 0, null, null, null))),
-                new FindByDateTestParameter("OK: 2017/8/12のデータがヒット(2)")
-                    .setDate(DateUtil.parseFullDatetime("2017-08-12 23:59:59.999"))
-                    .setResult(Arrays.asList(
-                        new Task(null, DateUtil.parseFullDatetime("2017-08-12 00:00:00.000"), 0, "テスト作業0", 0, null, null, null))),
-                new FindByDateTestParameter("OK: 2017/8/13のデータがヒット(1)")
-                    .setDate(DateUtil.parseFullDatetime("2017-08-13 00:00:00.000"))
-                    .setResult(Arrays.asList(
+        public static Collection<Object[]> parameters() {
+            return Arrays.asList(new Object[][] {
+                {
+                    "OK: データが0件",
+                    true,
+                    new Date(),
+                    Arrays.asList()
+                },
+                {
+                    "OK: 2017/8/11のデータが0件",
+                    false,
+                    DateUtil.parseFullDatetime("2017-08-11 23:59:59.999"),
+                    Arrays.asList()
+                },
+                {
+                    "OK: 2017/8/12のデータがヒット(1)",
+                    false,
+                    DateUtil.parseFullDatetime("2017-08-12 00:00:00.000"),
+                    Arrays.asList(
+                        new Task(null, DateUtil.parseFullDatetime("2017-08-12 00:00:00.000"), 0, "テスト作業0", 0, null, null, null))
+                },
+                {
+                    "OK: 2017/8/12のデータがヒット(2)",
+                    false,
+                    DateUtil.parseFullDatetime("2017-08-12 23:59:59.999"),
+                    Arrays.asList(
+                        new Task(null, DateUtil.parseFullDatetime("2017-08-12 00:00:00.000"), 0, "テスト作業0", 0, null, null, null))
+                },
+                {
+                    "OK: 2017/8/13のデータがヒット(1)",
+                    false,
+                    DateUtil.parseFullDatetime("2017-08-13 00:00:00.000"),
+                    Arrays.asList(
                         new Task(null, DateUtil.parseFullDatetime("2017-08-13 00:00:00.000"), 0, "テスト作業1", 0, null, null, null),
                         new Task(null, DateUtil.parseFullDatetime("2017-08-13 00:00:00.000"), 0, "テスト作業2", 0, null, null, null),
-                        new Task(null, DateUtil.parseFullDatetime("2017-08-13 00:00:00.000"), 0, "テスト作業3", 0, null, null, null))),
-                new FindByDateTestParameter("OK: 2017/8/13のデータがヒット(2)")
-                    .setDate(DateUtil.parseFullDatetime("2017-08-13 23:59:59.999"))
-                    .setResult(Arrays.asList(
+                        new Task(null, DateUtil.parseFullDatetime("2017-08-13 00:00:00.000"), 0, "テスト作業3", 0, null, null, null))
+                },
+                {
+                    "OK: 2017/8/13のデータがヒット(2)",
+                    false,
+                    DateUtil.parseFullDatetime("2017-08-13 23:59:59.999"),
+                    Arrays.asList(
                         new Task(null, DateUtil.parseFullDatetime("2017-08-13 00:00:00.000"), 0, "テスト作業1", 0, null, null, null),
                         new Task(null, DateUtil.parseFullDatetime("2017-08-13 00:00:00.000"), 0, "テスト作業2", 0, null, null, null),
-                        new Task(null, DateUtil.parseFullDatetime("2017-08-13 00:00:00.000"), 0, "テスト作業3", 0, null, null, null))),
-                new FindByDateTestParameter("OK: 2017/8/14のデータがヒット(1)")
-                    .setDate(DateUtil.parseFullDatetime("2017-08-14 00:00:00.000"))
-                    .setResult(Arrays.asList(
-                        new Task(null, DateUtil.parseFullDatetime("2017-08-14 00:00:00.000"), 0, "テスト作業4", 0, null, null, null))),
-                new FindByDateTestParameter("OK: 2017/8/14のデータがヒット(2)")
-                    .setDate(DateUtil.parseFullDatetime("2017-08-14 23:59:59.999"))
-                    .setResult(Arrays.asList(
-                        new Task(null, DateUtil.parseFullDatetime("2017-08-14 00:00:00.000"), 0, "テスト作業4", 0, null, null, null))),
-                new FindByDateTestParameter("OK: 2017/8/15のデータが0件")
-                    .setDate(DateUtil.parseFullDatetime("2017-08-15 00:00:00.000"))
-                    .setResult(Arrays.asList()));
+                        new Task(null, DateUtil.parseFullDatetime("2017-08-13 00:00:00.000"), 0, "テスト作業3", 0, null, null, null))
+                },
+                {
+                    "OK: 2017/8/14のデータがヒット(1)",
+                    false,
+                    DateUtil.parseFullDatetime("2017-08-14 00:00:00.000"),
+                    Arrays.asList(
+                        new Task(null, DateUtil.parseFullDatetime("2017-08-14 00:00:00.000"), 0, "テスト作業4", 0, null, null, null))
+                },
+                {
+                    "OK: 2017/8/14のデータがヒット(2)",
+                    false,
+                    DateUtil.parseFullDatetime("2017-08-14 23:59:59.999"),
+                    Arrays.asList(
+                        new Task(null, DateUtil.parseFullDatetime("2017-08-14 00:00:00.000"), 0, "テスト作業4", 0, null, null, null))
+                },
+                {
+                    "OK: 2017/8/15のデータが0件",
+                    false,
+                    DateUtil.parseFullDatetime("2017-08-15 00:00:00.000"),
+                    Arrays.asList()
+                }
+            });
         }
+
+        @Parameter(0)
+        public String testName;
+
+        @Parameter(1)
+        public boolean beforeCleanup = false;
+
+        @Parameter(2)
+        public Date date;
+
+        @Parameter(3)
+        public List<Task> result;
 
         @Test
         public void test() {
@@ -778,7 +695,7 @@ public class TaskServiceTest {
              * 事前準備
              */
             // 必要な場合、事前クリーンアップ
-            if (this.param.beforeCleanup) {
+            if (this.beforeCleanup) {
                 this.taskRepo.deleteAllInBatch();
                 assertThat(this.taskRepo.count(), is(0L));
             }
@@ -786,17 +703,17 @@ public class TaskServiceTest {
             /*
              * テスト実行
              */
-            List<Task> taskList = this.taskService.findByDate(this.param.date);
+            List<Task> taskList = this.taskService.findByDate(this.date);
 
             /*
              * テスト結果検証
              */
             // データ件数を検証
-            assertThat(taskList.size(), is(this.param.result.size()));
+            assertThat(taskList.size(), is(this.result.size()));
 
             // データ内容を検証
-            for (int i = 0; i < this.param.result.size(); i++) {
-                Task expected = this.param.result.get(i);
+            for (int i = 0; i < this.result.size(); i++) {
+                Task expected = this.result.get(i);
                 Task actual = taskList.get(i);
 
                 assertThat(expected.getDate() != null ? expected.getDate().getTime() : null,
