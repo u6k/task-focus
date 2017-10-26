@@ -25,8 +25,8 @@ public class TaskService {
     @Autowired
     private TaskRepository taskRepo;
 
-    public UUID create(Date date, String name, int estimatedTime, Date estimatedStartTime) {
-        L.debug("#create: date={}, name={}, estimatedTime={}, estimatedStartTime={}", date, name, estimatedTime, estimatedStartTime);
+    public UUID add(Date date, String name, int estimatedTime, Date estimatedStartTime) {
+        L.debug("#add: date={}, name={}, estimatedTime={}, estimatedStartTime={}", date, name, estimatedTime, estimatedStartTime);
 
         /*
          * タスクを設定

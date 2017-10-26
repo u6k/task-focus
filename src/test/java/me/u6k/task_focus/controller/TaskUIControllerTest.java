@@ -136,7 +136,7 @@ public class TaskUIControllerTest {
         public void setup() {
             this.taskRepo.deleteAllInBatch();
 
-            this.task1id = this.taskService.create(new Date(), "テスト作業1", 0, null);
+            this.task1id = this.taskService.add(new Date(), "テスト作業1", 0, null);
         }
 
         @Test
@@ -178,9 +178,9 @@ public class TaskUIControllerTest {
         public void setup() {
             this.taskRepo.deleteAllInBatch();
 
-            this.task1Id = this.taskService.create(new Date(), "テスト作業1", 0, null);
-            this.task2Id = this.taskService.create(new Date(), "テスト作業2", 0, null);
-            this.task3Id = this.taskService.create(new Date(), "テスト作業3", 0, null);
+            this.task1Id = this.taskService.add(new Date(), "テスト作業1", 0, null);
+            this.task2Id = this.taskService.add(new Date(), "テスト作業2", 0, null);
+            this.task3Id = this.taskService.add(new Date(), "テスト作業3", 0, null);
         }
 
         @Test

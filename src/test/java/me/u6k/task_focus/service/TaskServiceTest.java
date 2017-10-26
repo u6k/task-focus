@@ -29,7 +29,7 @@ public class TaskServiceTest {
 
     @RunWith(Parameterized.class)
     @SpringBootTest
-    public static class create {
+    public static class add {
 
         @Autowired
         private TaskService taskService;
@@ -37,9 +37,9 @@ public class TaskServiceTest {
         @Autowired
         private TaskRepository taskRepo;
 
-        private CreateTestParameter param;
+        private AddTestParameter param;
 
-        public create(CreateTestParameter param) {
+        public add(AddTestParameter param) {
             this.param = param;
         }
 
@@ -53,7 +53,7 @@ public class TaskServiceTest {
             this.taskRepo.deleteAllInBatch();
         }
 
-        public static class CreateTestParameter {
+        public static class AddTestParameter {
 
             String testName;
 
@@ -71,7 +71,7 @@ public class TaskServiceTest {
 
             String causeMessage;
 
-            CreateTestParameter(String testName) {
+            AddTestParameter(String testName) {
                 this.testName = testName;
             }
 
@@ -80,37 +80,37 @@ public class TaskServiceTest {
                 return this.testName;
             }
 
-            CreateTestParameter setDate(Date date) {
+            AddTestParameter setDate(Date date) {
                 this.date = date;
                 return this;
             }
 
-            CreateTestParameter setName(String name) {
+            AddTestParameter setName(String name) {
                 this.name = name;
                 return this;
             }
 
-            CreateTestParameter setEstimatedTime(int estimatedTime) {
+            AddTestParameter setEstimatedTime(int estimatedTime) {
                 this.estimatedTime = estimatedTime;
                 return this;
             }
 
-            CreateTestParameter setEstimatedStartTime(Date estimatedStartTime) {
+            AddTestParameter setEstimatedStartTime(Date estimatedStartTime) {
                 this.estimatedStartTime = estimatedStartTime;
                 return this;
             }
 
-            CreateTestParameter setResult(Task result) {
+            AddTestParameter setResult(Task result) {
                 this.result = result;
                 return this;
             }
 
-            CreateTestParameter setCause(Class<? extends Throwable> cause) {
+            AddTestParameter setCause(Class<? extends Throwable> cause) {
                 this.cause = cause;
                 return this;
             }
 
-            CreateTestParameter setCauseMessage(String causeMessage) {
+            AddTestParameter setCauseMessage(String causeMessage) {
                 this.causeMessage = causeMessage;
                 return this;
             }
@@ -118,87 +118,87 @@ public class TaskServiceTest {
         }
 
         @Parameters(name = "{0}")
-        public static Iterable<CreateTestParameter> getParameters() throws Exception {
+        public static Iterable<AddTestParameter> getParameters() throws Exception {
             return Arrays.asList(
-                new CreateTestParameter("OK: 登録できる")
+                new AddTestParameter("OK: 登録できる")
                     .setDate(DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"))
                     .setName("テスト作業")
                     .setEstimatedTime(60)
                     .setEstimatedStartTime(null)
                     .setResult(new Task(null, DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"), 0, "テスト作業", 60, null, null, null)),
-                new CreateTestParameter("OK: dateの時分秒ミリ秒がリセットされる")
+                new AddTestParameter("OK: dateの時分秒ミリ秒がリセットされる")
                     .setDate(DateUtil.parseFullDatetime("2017-08-17 23:45:56.987"))
                     .setName("テスト作業")
                     .setEstimatedTime(60)
                     .setEstimatedStartTime(null)
                     .setResult(new Task(null, DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"), 0, "テスト作業", 60, null, null, null)),
-                new CreateTestParameter("NG: dateがnull")
+                new AddTestParameter("NG: dateがnull")
                     .setDate(null)
                     .setName("テスト作業")
                     .setEstimatedTime(60)
                     .setEstimatedStartTime(null)
                     .setCause(IllegalStateException.class)
                     .setCauseMessage("task.date is null."),
-                new CreateTestParameter("NG: nameがnull")
+                new AddTestParameter("NG: nameがnull")
                     .setDate(DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"))
                     .setName(null)
                     .setEstimatedTime(60)
                     .setEstimatedStartTime(null)
                     .setCause(IllegalStateException.class)
                     .setCauseMessage("task.name is blank."),
-                new CreateTestParameter("NG: nameが空文字列")
+                new AddTestParameter("NG: nameが空文字列")
                     .setDate(DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"))
                     .setName("")
                     .setEstimatedTime(60)
                     .setEstimatedStartTime(null)
                     .setCause(IllegalStateException.class)
                     .setCauseMessage("task.name is blank."),
-                new CreateTestParameter("NG: nameが空白文字")
+                new AddTestParameter("NG: nameが空白文字")
                     .setDate(DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"))
                     .setName(" ")
                     .setEstimatedTime(60)
                     .setEstimatedStartTime(null)
                     .setCause(IllegalStateException.class)
                     .setCauseMessage("task.name is blank."),
-                new CreateTestParameter("OK: nameの前後に空白文字")
+                new AddTestParameter("OK: nameの前後に空白文字")
                     .setDate(DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"))
                     .setName("     テスト作業    ")
                     .setEstimatedTime(60)
                     .setEstimatedStartTime(null)
                     .setResult(new Task(null, DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"), 0, "テスト作業", 60, null, null, null)),
-                new CreateTestParameter("NG: estimatedTimeがマイナス")
+                new AddTestParameter("NG: estimatedTimeがマイナス")
                     .setDate(DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"))
                     .setName("テスト作業")
                     .setEstimatedTime(-1)
                     .setEstimatedStartTime(null)
                     .setCause(IllegalStateException.class)
                     .setCauseMessage("task.estimatedTime < 0"),
-                new CreateTestParameter("OK: estimatedTimeが0")
+                new AddTestParameter("OK: estimatedTimeが0")
                     .setDate(DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"))
                     .setName("テスト作業")
                     .setEstimatedTime(0)
                     .setEstimatedStartTime(null)
                     .setResult(new Task(null, DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"), 0, "テスト作業", 0, null, null, null)),
-                new CreateTestParameter("NG: estimatedStartTimeがdateの前日")
+                new AddTestParameter("NG: estimatedStartTimeがdateの前日")
                     .setDate(DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"))
                     .setName("テスト作業")
                     .setEstimatedTime(0)
                     .setEstimatedStartTime(DateUtil.parseFullDatetime("2017-08-16 23:59:59.999"))
                     .setCause(IllegalStateException.class)
                     .setCauseMessage("task.date and task.estimatedStartTime is not same day."),
-                new CreateTestParameter("OK: estimatedStartTimeとdateが同日(1)")
+                new AddTestParameter("OK: estimatedStartTimeとdateが同日(1)")
                     .setDate(DateUtil.parseFullDatetime("2017-08-17 23:45:56.987"))
                     .setName("テスト作業")
                     .setEstimatedTime(0)
                     .setEstimatedStartTime(DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"))
                     .setResult(new Task(null, DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"), 0, "テスト作業", 0, DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"), null, null)),
-                new CreateTestParameter("OK: estimatedStartTimeとdateが同日(2)")
+                new AddTestParameter("OK: estimatedStartTimeとdateが同日(2)")
                     .setDate(DateUtil.parseFullDatetime("2017-08-17 23:45:56.987"))
                     .setName("テスト作業")
                     .setEstimatedTime(0)
                     .setEstimatedStartTime(DateUtil.parseFullDatetime("2017-08-17 23:59:59.999"))
                     .setResult(new Task(null, DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"), 0, "テスト作業", 0, DateUtil.parseFullDatetime("2017-08-17 23:59:59.999"), null, null)),
-                new CreateTestParameter("NG: estimatedStartTimeがdateの翌日")
+                new AddTestParameter("NG: estimatedStartTimeがdateの翌日")
                     .setDate(DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"))
                     .setName("テスト作業")
                     .setEstimatedTime(0)
@@ -213,7 +213,7 @@ public class TaskServiceTest {
                 /*
                  * テスト実行
                  */
-                UUID id = this.taskService.create(this.param.date,
+                UUID id = this.taskService.add(this.param.date,
                     this.param.name,
                     this.param.estimatedTime,
                     this.param.estimatedStartTime);
@@ -300,19 +300,19 @@ public class TaskServiceTest {
             this.taskRepo.deleteAllInBatch();
 
             // 事前条件準備
-            UUID id = this.taskService.create(DateUtil.parseFullDatetime("2017-08-12 23:59:59.999"), "テスト作業0", 0, null);
+            UUID id = this.taskService.add(DateUtil.parseFullDatetime("2017-08-12 23:59:59.999"), "テスト作業0", 0, null);
             this.task1 = this.taskRepo.findOne(id);
 
-            id = this.taskService.create(DateUtil.parseFullDatetime("2017-08-13 00:00:00.000"), "テスト作業1", 0, null);
+            id = this.taskService.add(DateUtil.parseFullDatetime("2017-08-13 00:00:00.000"), "テスト作業1", 0, null);
             this.task2 = this.taskRepo.findOne(id);
 
-            id = this.taskService.create(DateUtil.parseFullDatetime("2017-08-13 12:34:56.987"), "テスト作業2", 0, null);
+            id = this.taskService.add(DateUtil.parseFullDatetime("2017-08-13 12:34:56.987"), "テスト作業2", 0, null);
             this.task3 = this.taskRepo.findOne(id);
 
-            id = this.taskService.create(DateUtil.parseFullDatetime("2017-08-13 23:59:59.999"), "テスト作業3", 0, null);
+            id = this.taskService.add(DateUtil.parseFullDatetime("2017-08-13 23:59:59.999"), "テスト作業3", 0, null);
             this.task4 = this.taskRepo.findOne(id);
 
-            id = this.taskService.create(DateUtil.parseFullDatetime("2017-08-14 00:00:00.000"), "テスト作業4", 0, null);
+            id = this.taskService.add(DateUtil.parseFullDatetime("2017-08-14 00:00:00.000"), "テスト作業4", 0, null);
             this.task5 = this.taskRepo.findOne(id);
         }
 
@@ -686,11 +686,11 @@ public class TaskServiceTest {
 
             this.taskRepo.deleteAllInBatch();
 
-            this.taskService.create(DateUtil.parseFullDatetime("2017-08-12 23:59:59.999"), "テスト作業0", 0, null);
-            this.taskService.create(DateUtil.parseFullDatetime("2017-08-13 00:00:00.000"), "テスト作業1", 0, null);
-            this.taskService.create(DateUtil.parseFullDatetime("2017-08-13 12:34:56.987"), "テスト作業2", 0, null);
-            this.taskService.create(DateUtil.parseFullDatetime("2017-08-13 23:59:59.999"), "テスト作業3", 0, null);
-            this.taskService.create(DateUtil.parseFullDatetime("2017-08-14 00:00:00.000"), "テスト作業4", 0, null);
+            this.taskService.add(DateUtil.parseFullDatetime("2017-08-12 23:59:59.999"), "テスト作業0", 0, null);
+            this.taskService.add(DateUtil.parseFullDatetime("2017-08-13 00:00:00.000"), "テスト作業1", 0, null);
+            this.taskService.add(DateUtil.parseFullDatetime("2017-08-13 12:34:56.987"), "テスト作業2", 0, null);
+            this.taskService.add(DateUtil.parseFullDatetime("2017-08-13 23:59:59.999"), "テスト作業3", 0, null);
+            this.taskService.add(DateUtil.parseFullDatetime("2017-08-14 00:00:00.000"), "テスト作業4", 0, null);
         }
 
         public static class FindByDateTestParameter {

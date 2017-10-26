@@ -74,7 +74,7 @@ public class TaskUIController {
         }
 
         try {
-            this.taskService.create(form.getDate(), form.getName(), 0, null);
+            this.taskService.add(form.getDate(), form.getName(), 0, null);
             L.debug("taskService.create: success");
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
