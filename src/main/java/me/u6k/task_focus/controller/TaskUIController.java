@@ -37,7 +37,7 @@ public class TaskUIController {
     }
 
     @RequestMapping(value = "/ui/tasks", method = RequestMethod.GET)
-    public String list(@ModelAttribute("form") TaskAddVO form, Model model) {
+    public String findToday(@ModelAttribute("form") TaskAddVO form, Model model) {
         L.debug("#list: form={}, model={}", form, model);
 
         Date date = new Date();
