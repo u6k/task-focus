@@ -28,6 +28,17 @@ docker run \
     task-focus-dev
 ```
 
+動作確認
+
+```
+docker run \
+    --rm \
+    -p 8080:8080 \
+    -v "${PWD}:/var/my-app" \
+    -v "${HOME}/.m2:/root/.m2" \
+    task-focus-dev mvn spring-boot:run
+```
+
 実行用Dockerイメージをビルド
 
 ```

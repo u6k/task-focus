@@ -119,7 +119,7 @@ public class TaskUIControllerTest {
     @RunWith(SpringRunner.class)
     @SpringBootTest
     @AutoConfigureMockMvc
-    public static class edit {
+    public static class update {
 
         @Autowired
         private MockMvc mvc;
@@ -136,13 +136,13 @@ public class TaskUIControllerTest {
         public void setup() {
             this.taskRepo.deleteAllInBatch();
 
-            this.task1id = this.taskService.create(new Date(), "テスト作業1", 0, null);
+            this.task1id = this.taskService.add(new Date(), "テスト作業1", 0, null);
         }
 
         @Test
         public void 初期表示() throws Exception {
             // テスト実行
-            ResultActions result = this.mvc.perform(get("/ui/tasks/" + this.task1id + "/edit"));
+            ResultActions result = this.mvc.perform(get("/ui/tasks/" + this.task1id + "/update"));
 
             // テスト結果検証
             result.andExpect(status().isOk());
@@ -157,7 +157,7 @@ public class TaskUIControllerTest {
     @RunWith(SpringRunner.class)
     @SpringBootTest
     @AutoConfigureMockMvc
-    public static class delete {
+    public static class remove {
 
         @Autowired
         private MockMvc mvc;
@@ -178,9 +178,9 @@ public class TaskUIControllerTest {
         public void setup() {
             this.taskRepo.deleteAllInBatch();
 
-            this.task1Id = this.taskService.create(new Date(), "テスト作業1", 0, null);
-            this.task2Id = this.taskService.create(new Date(), "テスト作業2", 0, null);
-            this.task3Id = this.taskService.create(new Date(), "テスト作業3", 0, null);
+            this.task1Id = this.taskService.add(new Date(), "テスト作業1", 0, null);
+            this.task2Id = this.taskService.add(new Date(), "テスト作業2", 0, null);
+            this.task3Id = this.taskService.add(new Date(), "テスト作業3", 0, null);
         }
 
         @Test
@@ -189,7 +189,7 @@ public class TaskUIControllerTest {
             assertThat(this.taskRepo.count(), is(3L));
 
             // テスト実行
-            ResultActions result = this.mvc.perform(post("/ui/tasks/" + this.task1Id + "/delete"));
+            ResultActions result = this.mvc.perform(post("/ui/tasks/" + this.task1Id + "/remove"));
 
             // テスト結果検証
             result.andExpect(status().isFound())
