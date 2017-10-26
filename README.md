@@ -147,4 +147,4 @@ __TODO:__ E2Eテストは未実装です。
 
 ## License
 
-[MIT License &copy; 2017 u6k.apps@gmail.com](https://github.com/u6k/task-focus/blob/master/LICENSE)
+[MIT License &copy; 2016 u6k.apps@gmail.com](https://github.com/u6k/task-focus/blob/master/LICENSE)
