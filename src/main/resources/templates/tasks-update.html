@@ -41,9 +41,9 @@ body {
                 <button type="submit" class="btn btn-success">Update</button>
             </div>
         </form>
-        <form role="form" action="tasks.html" method="post" th:action="@{'/ui/tasks/'+${id}+'/delete'}">
+        <form role="form" action="tasks.html" method="post" th:action="@{'/ui/tasks/'+${id}+'/remove'}">
             <div class="form-group">
-                <button type="submit" class="btn btn-danger">Delete</button>
+                <button type="submit" class="btn btn-danger">Remove</button>
             </div>
         </form>
     </div>

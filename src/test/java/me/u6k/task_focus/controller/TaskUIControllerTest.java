@@ -157,7 +157,7 @@ public class TaskUIControllerTest {
     @RunWith(SpringRunner.class)
     @SpringBootTest
     @AutoConfigureMockMvc
-    public static class delete {
+    public static class remove {
 
         @Autowired
         private MockMvc mvc;
@@ -189,7 +189,7 @@ public class TaskUIControllerTest {
             assertThat(this.taskRepo.count(), is(3L));
 
             // テスト実行
-            ResultActions result = this.mvc.perform(post("/ui/tasks/" + this.task1Id + "/delete"));
+            ResultActions result = this.mvc.perform(post("/ui/tasks/" + this.task1Id + "/remove"));
 
             // テスト結果検証
             result.andExpect(status().isFound())

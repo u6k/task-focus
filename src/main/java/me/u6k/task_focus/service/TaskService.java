@@ -89,8 +89,8 @@ public class TaskService {
         L.debug("taskRepo.save: success");
     }
 
-    public void delete(UUID id) {
-        L.debug("#delete: id={}", id);
+    public void remove(UUID id) {
+        L.debug("#remove: id={}", id);
 
         /*
          * 入力チェック

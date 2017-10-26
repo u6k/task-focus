@@ -506,7 +506,7 @@ public class TaskServiceTest {
 
     @RunWith(Parameterized.class)
     @SpringBootTest
-    public static class delete {
+    public static class remove {
 
         @Autowired
         private TaskService taskService;
@@ -514,7 +514,7 @@ public class TaskServiceTest {
         @Autowired
         private TaskRepository taskRepo;
 
-        private DeleteTestParameter param;
+        private RemoveTestParameter param;
 
         private Task task1;
 
@@ -526,7 +526,7 @@ public class TaskServiceTest {
 
         private Task task5;
 
-        public delete(DeleteTestParameter param) {
+        public remove(RemoveTestParameter param) {
             this.param = param;
         }
 
@@ -559,7 +559,7 @@ public class TaskServiceTest {
             this.taskRepo.save(this.task5);
         }
 
-        public static class DeleteTestParameter {
+        public static class RemoveTestParameter {
 
             String testName;
 
@@ -571,7 +571,7 @@ public class TaskServiceTest {
 
             String causeMessage;
 
-            DeleteTestParameter(String testName) {
+            RemoveTestParameter(String testName) {
                 this.testName = testName;
             }
 
@@ -580,27 +580,27 @@ public class TaskServiceTest {
                 return this.testName;
             }
 
-            public DeleteTestParameter setTestName(String testName) {
+            public RemoveTestParameter setTestName(String testName) {
                 this.testName = testName;
                 return this;
             }
 
-            public DeleteTestParameter setId(UUID id) {
+            public RemoveTestParameter setId(UUID id) {
                 this.id = id;
                 return this;
             }
 
-            public DeleteTestParameter setResult(long result) {
+            public RemoveTestParameter setResult(long result) {
                 this.result = result;
                 return this;
             }
 
-            public DeleteTestParameter setCause(Class<? extends Throwable> cause) {
+            public RemoveTestParameter setCause(Class<? extends Throwable> cause) {
                 this.cause = cause;
                 return this;
             }
 
-            public DeleteTestParameter setCauseMessage(String causeMessage) {
+            public RemoveTestParameter setCauseMessage(String causeMessage) {
                 this.causeMessage = causeMessage;
                 return this;
             }
@@ -608,17 +608,17 @@ public class TaskServiceTest {
         }
 
         @Parameters(name = "{0}")
-        public static Iterable<DeleteTestParameter> getParameters() throws Exception {
+        public static Iterable<RemoveTestParameter> getParameters() throws Exception {
             return Arrays.asList(
-                new DeleteTestParameter("OK: 削除できる")
+                new RemoveTestParameter("OK: 削除できる")
                     .setId(UUID.fromString("ef089e3b-c51c-4dbf-aec4-0ebbfb00a5c0"))
                     .setResult(4L),
-                new DeleteTestParameter("NG: idがnull")
+                new RemoveTestParameter("NG: idがnull")
                     .setId(null)
                     .setResult(5L)
                     .setCause(IllegalArgumentException.class)
                     .setCauseMessage("id is null."),
-                new DeleteTestParameter("NG: 作業が存在しない")
+                new RemoveTestParameter("NG: 作業が存在しない")
                     .setId(UUID.fromString("0df2f094-721a-4ad9-946a-34d523d5ee10"))
                     .setResult(5L)
                     .setCause(IllegalArgumentException.class)
@@ -631,7 +631,7 @@ public class TaskServiceTest {
                 /*
                  * テスト実行
                  */
-                this.taskService.delete(this.param.id);
+                this.taskService.remove(this.param.id);
 
                 /*
                  * テスト結果検証
