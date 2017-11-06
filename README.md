@@ -37,6 +37,7 @@ Dockerイメージを配布しているため、次のように実行するこ�
 ```
 $ docker run \
     -p 8080:8080 \
+    -v ${HOME}/volumes/task-focus:/var/task-focus \
     u6kapps/task-focus
 ```
 
@@ -56,7 +57,9 @@ TODO
 
 ## API
 
-TODO
+プロジェクト・レポートは、次のURLで公開しています。
+
+- https://u6k.github.io/task-focus/index.html
 
 ## Maintainer
 
