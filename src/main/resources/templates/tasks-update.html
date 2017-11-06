@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"></meta>
+<meta http-equiv="X-UA-Compatible" content="IE=edge"></meta>
+<meta name="viewport" content="width=device-width, initial-scale=1"></meta>
+<title>Update Task | Task Focus</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"></link>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"></link>
+<style>
+body {
+    padding-top: 70px;
+}
+</style>
+</head>
+<body>
+    <nav th:replace="navigation :: nav"></nav>
+    <div class="container-fluid">
+        <h1 class="page-header">Update Task</h1>
+        <div class="alert alert-danger" role="alert" th:if="${error}" th:text="${error}">エラー</div>
+        <form role="form" action="tasks.html" method="post" th:action="@{'/ui/tasks/'+${id}+'/update'}" th:object="${taskUpdateForm}">
+            <div class="form-group has-error" th:class="${#fields.hasErrors('date')}? 'form-group has-error' : 'form-group'">
+                <label for="date">作業日</label><input type="date" class="form-control" id="date" name="date" placeholder="2017-08-14" th:field="*{date}"></input><span class="help-block" th:if="${#fields.hasErrors('date')}" th:errors="*{date}">error</span>
+            </div>
+            <div class="form-group has-error" th:class="${#fields.hasErrors('name')}? 'form-group has-error' : 'form-group'">
+                <label for="name">作業名</label><input type="text" class="form-control" id="name" name="name" placeholder="本を読む" th:field="*{name}"></input><span class="help-block" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">error</span>
+            </div>
+            <div class="form-group has-error" th:class="${#fields.hasErrors('estimatedStartTimePart')}? 'form-group has-error' : 'form-group'">
+                <label for="estimatedStartTimePart">開始予定時刻</label><input type="time" class="form-control" id="estimatedStartTimePart" name="estimatedStartTimePart" placeholder="13:00" th:field="*{estimatedStartTimePart}"></input><span class="help-block" th:if="${#fields.hasErrors('estimatedStartTimePart')}" th:errors="*{estimatedStartTimePart}">error</span>
+            </div>
+            <div class="form-group has-error" th:class="${#fields.hasErrors('estimatedTime')}? 'form-group has-error' : 'form-group'">
+                <label for="estimatedTime">見積り時間(分)</label><input type="number" class="form-control" id="estimatedTime" name="estimatedTime" placeholder="60" th:field="*{estimatedTime}"></input><span class="help-block" th:if="${#fields.hasErrors('estimatedTime')}" th:errors="*{estimatedTime}">error</span>
+            </div>
+            <div class="form-group has-error" th:class="${#fields.hasErrors('actualStartTimePart')}? 'form-group has-error' : 'form-group'">
+                <label for="actualStartTimePart">開始実績時刻</label><input type="time" class="form-control" id="actualStartTimePart" name="actualStartTimePart" placeholder="13:00" th:field="*{actualStartTimePart}"></input><span class="help-block" th:if="${#fields.hasErrors('actualStartTimePart')}" th:errors="*{actualStartTimePart}">error</span>
+            </div>
+            <div class="form-group has-error" th:class="${#fields.hasErrors('actualTime')}? 'form-group has-error' : 'form-group'">
+                <label for="actualTime">実績時間(分)</label><input type="number" class="form-control" id="actualTime" name="actualTime" placeholder="60" th:field="*{actualTime}"></input><span class="help-block" th:if="${#fields.hasErrors('actualTime')}" th:errors="*{actualTime}">error</span>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-success">Update</button>
+            </div>
+        </form>
+        <form role="form" action="tasks.html" method="post" th:action="@{'/ui/tasks/'+${id}+'/remove'}">
+            <div class="form-group">
+                <button type="submit" class="btn btn-danger">Remove</button>
+            </div>
+        </form>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</body>
+</html>

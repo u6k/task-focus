@@ -1,0 +1,28 @@
+sudo: required
+language: java
+
+services:
+    - docker
+
+before_install:
+    - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+    - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+    - sudo apt-get update
+    - sudo apt-get -y install docker-ce
+
+script:
+    - ./mvnw clean site
+    - docker build -t u6kapps/task-focus .
+
+after_success:
+    - if [ -n "$TRAVIS_TAG" ]; then
+          docker login -u "$DOCKER_USER" -p "$DOCKER_PASS";
+          docker tag u6kapps/task-focus u6kapps/task-focus:$TRAVIS_TAG;
+          docker push u6kapps/task-focus;
+      else
+          echo skip docker push;
+      fi
+
+notifications:
+  slack:
+    secure: u23/NG/1iq2A1Hrov67g9eU9Er+z4RvfOB2GmeOsewXKQVlr1IaJ4zu4C66Z17eQuM+lfFiS+doJsHp03RUiBPQh80FSEZ0oOi2F4QSR9rWhNH1BC7rVW54ZGbcQRNuRwEBJolQgESjIBhEaPOpuhyuGb29MrG+QvPbKHOGWeYSxJ3TArpEXdqCW5WiPnAkefKa+oMMZoWe6WGly3mYSjcdax2VikjFXYbZ5luSC/w0NR0GxD2u6ABnDB/A9QQBXw98Ty3RzSOVLb1zGm1q4BJp6xiI4pC5ZPNz3ctJDEcZlHHe+4jKwhq3J9r4yayOmWxTu9/uYAFqDTiX3B+eHqvV1KTLm/IpHEVzhBL8V7q7YY+3SbhpPeAI2ZPuumzGu8VUAthiHgVsctKuu0Qc6vLHuOKhUMJyMNh17l8GMfM1dgU3UaUfm8xbufRX5fMbo+fdQ0S6f8v2d8KirMeonu5cYkheT7uEQHUBCN9u2miqINC91GxsTGJ/pxYIKp7Egnexf2FjRG9SPWy5SvH01kq9B6uag9qLbAZZm1THb18xbcWmiAgp8s8XDPVbqiMY7D+LmS+u2iexQH+nJfVQmZ9xiW1zyBOSSXLA89E3XNVnGdMQElYvLYXlii+WBUKMqtpn1Kj/oREeXWIkgABmEvUSong6p1l/+YYPXDB0ikyE=
