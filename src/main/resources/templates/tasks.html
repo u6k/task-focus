@@ -16,10 +16,7 @@ body {
 <body>
     <nav th:replace="navigation :: nav"></nav>
     <div class="container-fluid">
-        <h1 class="page-header">Tasks</h1>
-        <h2>
-            作業日: <span th:text="${#dates.format(date, 'yyyy-MM-dd')}">2017-08-15</span>
-        </h2>
+        <h1 class="page-header">Tasks (<span th:text="${#dates.format(date, 'yyyy-MM-dd')}">2017-08-15</span>)</h1>
         <table class="table">
             <thead>
                 <tr>
@@ -31,7 +28,7 @@ body {
                 </tr>
             </thead>
             <tbody>
-                <tr th:each="task : ${taskList}">
+                <tr th:each="task : ${availableTaskList}">
                     <td><a href="/ui/tasks/xxxxx-xx-xx-xx-xxxx/update" th:text="${task.name}" th:href="@{'/ui/tasks/'+${task.id}+'/update'}">テスト作業1</a></td>
                     <td th:text="${task.estimatedStartTime} ? ${#dates.format(task.estimatedStartTime, 'HH:mm')} : ''">13:00</td>
                     <td th:text="${task.estimatedTime}">60</td>
@@ -40,10 +37,25 @@ body {
                 </tr>
             </tbody>
         </table>
-        <div class="alert alert-danger" role="alert" th:if="${error}" th:text="${error}">エラー</div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>完了した作業名</th>
+                    <th>開始実績時刻</th>
+                    <th>実績時間(分)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="task : ${finishedTaskList}" class="text-muted">
+                    <td><del><a href="/ui/tasks/xxxxx-xx-xx-xx-xxxx/update" th:text="${task.name}" th:href="@{'/ui/tasks/'+${task.id}+'/update'}" class="text-muted">テスト作業1</a></del></td>
+                    <td th:text="${task.actualStartTime} ? ${#dates.format(task.actualStartTime, 'HH:mm')} : ''">13:00</td>
+                    <td th:text="${task.actualTime}">60</td>
+                </tr>
+            </tbody>
+        </table>
         <form role="form" action="tasks.html" method="post" th:action="@{/ui/tasks/add}" th:object="${form}">
-            <div class="form-group has-error" th:class="${#fields.hasErrors('name')}? 'form-group has-error' : 'form-group'">
-                <label for="name">追加する作業名</label><input type="text" class="form-control" id="name" name="name" placeholder="本を読む" th:field="*{name}"></input><span class="help-block" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">error</span>
+            <div class="form-group">
+                <label for="name">追加する作業名</label><input type="text" class="form-control" id="name" name="name" placeholder="本を読む" th:field="*{name}"></input>
             </div>
             <button type="submit" class="btn btn-success">Add</button>
         </form>
