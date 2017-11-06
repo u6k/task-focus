@@ -117,24 +117,28 @@ public class TaskUIController {
     }
 
     @RequestMapping(value = "/ui/tasks/{id}/update", method = RequestMethod.GET)
-    public String updateInit(@PathVariable String id, @ModelAttribute("form") TaskUpdateVO form, Model model) {
-        L.debug("#updateInit: id={}, form={}, model={}", id, form, model);
+    public String updateInit(@PathVariable String id,
+        @ModelAttribute("taskUpdateForm") TaskUpdateVO taskUpdateForm,
+        @ModelAttribute("changeDateForm") ChangeDateVO changeDateForm,
+        Model model) {
+        L.debug("#updateInit: id={}, taskUpdateForm={}, changeDateForm={}, model={}", id, taskUpdateForm, changeDateForm, model);
 
         /*
          * ページ内容、フォームを構築
          */
         // 更新対象タスクを検索、フォームに設定
         Task task = this.taskService.findById(UUID.fromString(id));
-        form.setDate(task.getEstimatedStartTime());
-        form.setName(task.getName());
-        form.setEstimatedStartTimePart(task.getEstimatedStartTime());
-        form.setEstimatedTime(task.getEstimatedTime());
-        form.setActualStartTimePart(task.getActualStartTime());
-        form.setActualTime(task.getActualTime());
-        L.debug("setup form: form={}", form);
+        taskUpdateForm.setDate(task.getEstimatedStartTime());
+        taskUpdateForm.setName(task.getName());
+        taskUpdateForm.setEstimatedStartTimePart(task.getEstimatedStartTime());
+        taskUpdateForm.setEstimatedTime(task.getEstimatedTime());
+        taskUpdateForm.setActualStartTimePart(task.getActualStartTime());
+        taskUpdateForm.setActualTime(task.getActualTime());
+        L.debug("setup form: taskUpdateForm={}", taskUpdateForm);
 
         // ページ内容を設定
         model.addAttribute("id", id);
+
         L.debug("setup model: model={}", model);
 
         L.debug("return");
@@ -142,8 +146,12 @@ public class TaskUIController {
     }
 
     @RequestMapping(value = "/ui/tasks/{id}/update", method = RequestMethod.POST)
-    public String update(@PathVariable String id, @Validated @ModelAttribute("form") TaskUpdateVO form, BindingResult result, Model model) {
-        L.debug("update: id={}, form={}, result={}, model={}", id, form, result, model);
+    public String update(@PathVariable String id,
+        @Validated @ModelAttribute("taskUpdateForm") TaskUpdateVO taskUpdateForm,
+        @ModelAttribute("changeDateForm") ChangeDateVO changeDateForm,
+        BindingResult result,
+        Model model) {
+        L.debug("update: id={}, taskUpdateForm={}, changeDateForm={}, result={}, model={}", id, taskUpdateForm, changeDateForm, result, model);
 
         /*
          * 入力チェック
@@ -160,26 +168,26 @@ public class TaskUIController {
         // 入力内容をサービス引数に合わせて変換
         UUID taskId = UUID.fromString(id);
 
-        Date estimatedStartTime = DateUtil.buildDatetime(form.getDate(), form.getEstimatedStartTimePart());
+        Date estimatedStartTime = DateUtil.buildDatetime(taskUpdateForm.getDate(), taskUpdateForm.getEstimatedStartTimePart());
         Date actualStartTime = null;
-        if (form.getActualStartTimePart() != null) {
-            actualStartTime = DateUtil.buildDatetime(form.getDate(), form.getActualStartTimePart());
+        if (taskUpdateForm.getActualStartTimePart() != null) {
+            actualStartTime = DateUtil.buildDatetime(taskUpdateForm.getDate(), taskUpdateForm.getActualStartTimePart());
         }
 
         // サービスを実行
         this.taskService.update(taskId,
-            form.getName(),
+            taskUpdateForm.getName(),
             estimatedStartTime,
-            form.getEstimatedTime(),
+            taskUpdateForm.getEstimatedTime(),
             actualStartTime,
-            form.getActualTime());
+            taskUpdateForm.getActualTime());
         L.debug("taskService.update: success");
 
         /*
          * タスク一覧ページにリダイレクト
          */
         L.debug("return");
-        return redirectTasks(form.getDate());
+        return redirectTasks(taskUpdateForm.getDate());
     }
 
     @RequestMapping(value = "/ui/tasks/{id}/remove", method = RequestMethod.POST)
