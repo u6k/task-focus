@@ -98,12 +98,11 @@ public class TaskUIController {
          */
         // 更新対象タスクを検索、フォームに設定
         Task task = this.taskService.findById(UUID.fromString(id));
+        form.setDate(task.getEstimatedStartTime());
         form.setName(task.getName());
-        form.setEstimatedStartDate(task.getEstimatedStartTime());
-        form.setEstimatedStartTime(task.getEstimatedStartTime());
+        form.setEstimatedStartTimePart(task.getEstimatedStartTime());
         form.setEstimatedTime(task.getEstimatedTime());
-        form.setActualStartDate(task.getActualStartTime());
-        form.setActualStartTime(task.getActualStartTime());
+        form.setActualStartTimePart(task.getActualStartTime());
         form.setActualTime(task.getActualTime());
         L.debug("setup form: form={}", form);
 
@@ -134,10 +133,10 @@ public class TaskUIController {
         // 入力内容をサービス引数に合わせて変換
         UUID taskId = UUID.fromString(id);
 
-        Date estimatedStartTime = DateUtil.buildDatetime(form.getEstimatedStartDate(), form.getEstimatedStartTime());
+        Date estimatedStartTime = DateUtil.buildDatetime(form.getDate(), form.getEstimatedStartTimePart());
         Date actualStartTime = null;
-        if (form.getActualStartDate() != null && form.getActualStartTime() != null) {
-            actualStartTime = DateUtil.buildDatetime(form.getActualStartDate(), form.getActualStartTime());
+        if (form.getActualStartTimePart() != null) {
+            actualStartTime = DateUtil.buildDatetime(form.getDate(), form.getActualStartTimePart());
         }
 
         // サービスを実行

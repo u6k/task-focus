@@ -11,30 +11,25 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.Range;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.validation.Errors;
-import org.springframework.validation.Validator;
 
-public class TaskUpdateVO implements Validator {
+public class TaskUpdateVO {
+
+    @NotNull
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private Date date;
 
     @NotBlank
     private String name;
 
     @NotNull
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date estimatedStartDate;
-
-    @NotNull
     @DateTimeFormat(pattern = "HH:mm")
-    private Date estimatedStartTime;
+    private Date estimatedStartTimePart;
 
     @Range(min = 0)
     private Integer estimatedTime;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date actualStartDate;
-
     @DateTimeFormat(pattern = "HH:mm")
-    private Date actualStartTime;
+    private Date actualStartTimePart;
 
     @Range(min = 0)
     private Integer actualTime;
@@ -57,6 +52,14 @@ public class TaskUpdateVO implements Validator {
         return ToStringBuilder.reflectionToString(this);
     }
 
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
     public String getName() {
         return name;
     }
@@ -65,20 +68,12 @@ public class TaskUpdateVO implements Validator {
         this.name = name;
     }
 
-    public Date getEstimatedStartDate() {
-        return estimatedStartDate;
+    public Date getEstimatedStartTimePart() {
+        return estimatedStartTimePart;
     }
 
-    public void setEstimatedStartDate(Date estimatedStartDate) {
-        this.estimatedStartDate = estimatedStartDate;
-    }
-
-    public Date getEstimatedStartTime() {
-        return estimatedStartTime;
-    }
-
-    public void setEstimatedStartTime(Date estimatedStartTime) {
-        this.estimatedStartTime = estimatedStartTime;
+    public void setEstimatedStartTimePart(Date estimatedStartTimePart) {
+        this.estimatedStartTimePart = estimatedStartTimePart;
     }
 
     public Integer getEstimatedTime() {
@@ -89,20 +84,12 @@ public class TaskUpdateVO implements Validator {
         this.estimatedTime = estimatedTime;
     }
 
-    public Date getActualStartDate() {
-        return actualStartDate;
+    public Date getActualStartTimePart() {
+        return actualStartTimePart;
     }
 
-    public void setActualStartDate(Date actualStartDate) {
-        this.actualStartDate = actualStartDate;
-    }
-
-    public Date getActualStartTime() {
-        return actualStartTime;
-    }
-
-    public void setActualStartTime(Date actualStartTime) {
-        this.actualStartTime = actualStartTime;
+    public void setActualStartTimePart(Date actualStartTimePart) {
+        this.actualStartTimePart = actualStartTimePart;
     }
 
     public Integer getActualTime() {
@@ -111,21 +98,6 @@ public class TaskUpdateVO implements Validator {
 
     public void setActualTime(Integer actualTime) {
         this.actualTime = actualTime;
-    }
-
-    @Override
-    public boolean supports(Class<?> clazz) {
-        return TaskUpdateVO.class.isAssignableFrom(clazz);
-    }
-
-    @Override
-    public void validate(Object target, Errors errors) {
-        TaskUpdateVO form = (TaskUpdateVO) target;
-
-        if ((form.getActualStartDate() == null && form.getActualStartTime() != null)
-            || (form.getActualStartDate() != null && form.getActualStartTime() == null)) {
-            errors.rejectValue("actualStartDate", "validation.taskUpdate.actualStartDateAndTimeIsNull");
-        }
     }
 
 }
