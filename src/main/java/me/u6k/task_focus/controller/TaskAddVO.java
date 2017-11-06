@@ -1,21 +1,12 @@
 
 package me.u6k.task_focus.controller;
 
-import java.util.Date;
-
-import javax.validation.constraints.NotNull;
-
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hibernate.validator.constraints.NotBlank;
-import org.springframework.format.annotation.DateTimeFormat;
 
 public class TaskAddVO {
-
-    @NotNull
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date date;
 
     @NotBlank
     private String name;
@@ -36,14 +27,6 @@ public class TaskAddVO {
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
-    }
-
-    public Date getDate() {
-        return date;
-    }
-
-    public void setDate(Date date) {
-        this.date = date;
     }
 
     public String getName() {
