@@ -53,10 +53,11 @@ body {
                 </tr>
             </tbody>
         </table>
-        <form role="form" action="tasks.html" method="post" th:action="@{/ui/tasks/add}" th:object="${form}">
+        <form role="form" action="tasks.html" method="post" th:action="@{/ui/tasks/add}" th:object="${taskAddForm}">
             <div class="form-group">
                 <label for="name">追加する作業名</label><input type="text" class="form-control" id="name" name="name" placeholder="本を読む" th:field="*{name}"></input>
             </div>
+            <input type="hidden" id="date" name="date" th:field="*{date}"></input>
             <button type="submit" class="btn btn-success">Add</button>
         </form>
     </div>

@@ -14,6 +14,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class TaskUIController {
@@ -39,21 +41,30 @@ public class TaskUIController {
          * タスク一覧ページにリダイレクト
          */
         L.debug("return");
-        return "redirect:/ui/tasks";
+        return redirectTasks(null);
     }
 
     @RequestMapping(value = "/ui/tasks", method = RequestMethod.GET)
-    public String findToday(@ModelAttribute("form") TaskAddVO form, Model model) {
-        L.debug("#list: form={}, model={}", form, model);
+    public String findToday(@RequestParam(name = "date", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date date,
+        @ModelAttribute("taskAddForm") TaskAddVO taskAddForm,
+        @ModelAttribute("changeDateForm") ChangeDateVO changeDateForm,
+        Model model) {
+        L.debug("#list: date={}, taskAddForm={}, changeDateForm={}, model={}", date, taskAddForm, changeDateForm, model);
 
         /*
          * ページ内容、フォームを構築
          */
-        // タスク一覧部分を構築
-        Date date = new Date();
-        model.addAttribute("date", date);
+        // ヘッダーフォームを構築
+        changeDateForm.setTargetDate(date);
 
-        List<Task> taskList = this.taskService.findByDate(date);
+        // タスク一覧部分を構築
+        Date targetDate = date;
+        if (targetDate == null) {
+            targetDate = new Date();
+        }
+        model.addAttribute("date", targetDate);
+
+        List<Task> taskList = this.taskService.findByDate(targetDate);
         L.debug("taskService.findByDate: taskList={}", taskList);
 
         List<Task> availableTaskList = taskList.stream()
@@ -67,6 +78,9 @@ public class TaskUIController {
             .collect(Collectors.toList());
         L.debug("finishedTaskList.size={}", finishedTaskList.size());
         model.addAttribute("finishedTaskList", finishedTaskList);
+
+        // タスク追加フォームを構築
+        taskAddForm.setDate(targetDate);
 
         L.debug("setup model: model={}", model);
 
@@ -84,13 +98,13 @@ public class TaskUIController {
         L.debug("validate: hasErrors={}", result.hasErrors());
         if (result.hasErrors()) {
             L.debug("return");
-            return "redirect:/ui/tasks";
+            return redirectTasks(null);
         }
 
         /*
          * タスク追加サービスを実行
          */
-        Date estimatedStartTime = DateUtils.truncate(new Date(), Calendar.DAY_OF_MONTH);
+        Date estimatedStartTime = DateUtils.truncate(form.getDate(), Calendar.DAY_OF_MONTH);
 
         this.taskService.add(form.getName(), estimatedStartTime, null);
         L.debug("taskService.create: success");
@@ -99,28 +113,32 @@ public class TaskUIController {
          * タスク一覧ページにリダイレクト
          */
         L.debug("return");
-        return "redirect:/ui/tasks";
+        return redirectTasks(form.getDate());
     }
 
     @RequestMapping(value = "/ui/tasks/{id}/update", method = RequestMethod.GET)
-    public String updateInit(@PathVariable String id, @ModelAttribute("form") TaskUpdateVO form, Model model) {
-        L.debug("#updateInit: id={}, form={}, model={}", id, form, model);
+    public String updateInit(@PathVariable String id,
+        @ModelAttribute("taskUpdateForm") TaskUpdateVO taskUpdateForm,
+        @ModelAttribute("changeDateForm") ChangeDateVO changeDateForm,
+        Model model) {
+        L.debug("#updateInit: id={}, taskUpdateForm={}, changeDateForm={}, model={}", id, taskUpdateForm, changeDateForm, model);
 
         /*
          * ページ内容、フォームを構築
          */
         // 更新対象タスクを検索、フォームに設定
         Task task = this.taskService.findById(UUID.fromString(id));
-        form.setDate(task.getEstimatedStartTime());
-        form.setName(task.getName());
-        form.setEstimatedStartTimePart(task.getEstimatedStartTime());
-        form.setEstimatedTime(task.getEstimatedTime());
-        form.setActualStartTimePart(task.getActualStartTime());
-        form.setActualTime(task.getActualTime());
-        L.debug("setup form: form={}", form);
+        taskUpdateForm.setDate(task.getEstimatedStartTime());
+        taskUpdateForm.setName(task.getName());
+        taskUpdateForm.setEstimatedStartTimePart(task.getEstimatedStartTime());
+        taskUpdateForm.setEstimatedTime(task.getEstimatedTime());
+        taskUpdateForm.setActualStartTimePart(task.getActualStartTime());
+        taskUpdateForm.setActualTime(task.getActualTime());
+        L.debug("setup form: taskUpdateForm={}", taskUpdateForm);
 
         // ページ内容を設定
         model.addAttribute("id", id);
+
         L.debug("setup model: model={}", model);
 
         L.debug("return");
@@ -128,8 +146,12 @@ public class TaskUIController {
     }
 
     @RequestMapping(value = "/ui/tasks/{id}/update", method = RequestMethod.POST)
-    public String update(@PathVariable String id, @Validated @ModelAttribute("form") TaskUpdateVO form, BindingResult result, Model model) {
-        L.debug("update: id={}, form={}, result={}, model={}", id, form, result, model);
+    public String update(@PathVariable String id,
+        @Validated @ModelAttribute("taskUpdateForm") TaskUpdateVO taskUpdateForm,
+        @ModelAttribute("changeDateForm") ChangeDateVO changeDateForm,
+        BindingResult result,
+        Model model) {
+        L.debug("update: id={}, taskUpdateForm={}, changeDateForm={}, result={}, model={}", id, taskUpdateForm, changeDateForm, result, model);
 
         /*
          * 入力チェック
@@ -146,26 +168,26 @@ public class TaskUIController {
         // 入力内容をサービス引数に合わせて変換
         UUID taskId = UUID.fromString(id);
 
-        Date estimatedStartTime = DateUtil.buildDatetime(form.getDate(), form.getEstimatedStartTimePart());
+        Date estimatedStartTime = DateUtil.buildDatetime(taskUpdateForm.getDate(), taskUpdateForm.getEstimatedStartTimePart());
         Date actualStartTime = null;
-        if (form.getActualStartTimePart() != null) {
-            actualStartTime = DateUtil.buildDatetime(form.getDate(), form.getActualStartTimePart());
+        if (taskUpdateForm.getActualStartTimePart() != null) {
+            actualStartTime = DateUtil.buildDatetime(taskUpdateForm.getDate(), taskUpdateForm.getActualStartTimePart());
         }
 
         // サービスを実行
         this.taskService.update(taskId,
-            form.getName(),
+            taskUpdateForm.getName(),
             estimatedStartTime,
-            form.getEstimatedTime(),
+            taskUpdateForm.getEstimatedTime(),
             actualStartTime,
-            form.getActualTime());
+            taskUpdateForm.getActualTime());
         L.debug("taskService.update: success");
 
         /*
          * タスク一覧ページにリダイレクト
          */
         L.debug("return");
-        return "redirect:/ui/tasks";
+        return redirectTasks(taskUpdateForm.getDate());
     }
 
     @RequestMapping(value = "/ui/tasks/{id}/remove", method = RequestMethod.POST)
@@ -177,6 +199,8 @@ public class TaskUIController {
          */
         UUID taskId = UUID.fromString(id);
 
+        Task task = this.taskService.findById(taskId);
+
         this.taskService.remove(taskId);
         L.debug("taskService.remove: success");
 
@@ -184,7 +208,38 @@ public class TaskUIController {
          * タスク一覧ページにリダイレクト
          */
         L.debug("return");
-        return "redirect:/ui/tasks";
+        return redirectTasks(task.getEstimatedStartTime());
+    }
+
+    @RequestMapping(value = "/ui/tasks/changeDate", method = RequestMethod.POST)
+    public String changeDate(@Validated @ModelAttribute ChangeDateVO changeDateForm, BindingResult result, Model model) {
+        L.debug("changeDate: changeDateForm={}, model={}", changeDateForm, model);
+
+        /*
+         * 入力チェック
+         */
+        L.debug("validate: hasErrors={}", result.hasErrors());
+        if (result.hasErrors()) {
+            L.debug("return");
+            return redirectTasks(null);
+        }
+
+        /*
+         * タスク一覧ページにリダイレクト
+         */
+        return redirectTasks(changeDateForm.getTargetDate());
+    }
+
+    private String redirectTasks(Date date) {
+        String query = "";
+        if (date != null && !DateUtils.isSameDay(date, new Date())) {
+            query = "?date=" + DateUtil.formatDate(date);
+        }
+
+        String path = "redirect:/ui/tasks" + query;
+        L.debug("path={}", path);
+
+        return path;
     }
 
 }
