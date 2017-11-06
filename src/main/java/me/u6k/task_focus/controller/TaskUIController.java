@@ -5,6 +5,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import me.u6k.task_focus.model.Task;
 import me.u6k.task_focus.service.TaskService;
@@ -50,11 +51,23 @@ public class TaskUIController {
          */
         // タスク一覧部分を構築
         Date date = new Date();
+        model.addAttribute("date", date);
+
         List<Task> taskList = this.taskService.findByDate(date);
         L.debug("taskService.findByDate: taskList={}", taskList);
 
-        model.addAttribute("date", date);
-        model.addAttribute("taskList", taskList);
+        List<Task> availableTaskList = taskList.stream()
+            .filter(x -> (x.getActualStartTime() == null || x.getActualTime() == null))
+            .collect(Collectors.toList());
+        L.debug("availableTaskList.size={}", availableTaskList.size());
+        model.addAttribute("availableTaskList", availableTaskList);
+
+        List<Task> finishedTaskList = taskList.stream()
+            .filter(x -> (x.getActualStartTime() != null && x.getActualTime() != null))
+            .collect(Collectors.toList());
+        L.debug("finishedTaskList.size={}", finishedTaskList.size());
+        model.addAttribute("finishedTaskList", finishedTaskList);
+
         L.debug("setup model: model={}", model);
 
         L.debug("return");
