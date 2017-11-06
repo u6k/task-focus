@@ -7,7 +7,6 @@ import java.util.UUID;
 
 import me.u6k.task_focus.model.Task;
 import me.u6k.task_focus.service.TaskService;
-import me.u6k.task_focus.util.DateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,7 +73,7 @@ public class TaskUIController {
         }
 
         try {
-            this.taskService.add(form.getDate(), form.getName(), 0, null);
+            this.taskService.add(form.getName(), form.getDate(), null);
             L.debug("taskService.create: success");
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
@@ -93,12 +92,9 @@ public class TaskUIController {
         L.debug("#updateInit: id={}, form={}, model={}", id, form, model);
 
         Task task = this.taskService.findById(UUID.fromString(id));
-        form.setDate(task.getDate());
         form.setName(task.getName());
-        form.setEstimatedTime(task.getEstimatedTime());
         form.setEstimatedStartTime(task.getEstimatedStartTime());
-        form.setStartTime(task.getStartTime());
-        form.setEndTime(task.getEndTime());
+        form.setEstimatedTime(task.getEstimatedTime());
         L.debug("setup form: form={}", form);
 
         model.addAttribute("id", id);
@@ -122,12 +118,11 @@ public class TaskUIController {
             UUID taskId = UUID.fromString(id);
 
             this.taskService.update(taskId,
-                form.getDate(),
                 form.getName(),
+                form.getEstimatedStartTime(),
                 form.getEstimatedTime(),
-                form.getDate() != null ? DateUtil.toDatetime(form.getDate(), form.getEstimatedStartTime()) : null,
-                form.getDate() != null ? DateUtil.toDatetime(form.getDate(), form.getStartTime()) : null,
-                form.getDate() != null ? DateUtil.toDatetime(form.getDate(), form.getEndTime()) : null);
+                null,
+                null);
             L.debug("taskService.update: success");
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
