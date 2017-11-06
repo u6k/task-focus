@@ -6,18 +6,14 @@ import java.util.Date;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.hibernate.validator.constraints.NotBlank;
 import org.springframework.format.annotation.DateTimeFormat;
 
-public class TaskAddVO {
+public class ChangeDateVO {
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date date;
+    private Date targetDate;
 
-    @NotBlank
-    private String name;
-
-    public TaskAddVO() {
+    public ChangeDateVO() {
     }
 
     @Override
@@ -35,20 +31,12 @@ public class TaskAddVO {
         return ToStringBuilder.reflectionToString(this);
     }
 
-    public Date getDate() {
-        return date;
+    public Date getTargetDate() {
+        return targetDate;
     }
 
-    public void setDate(Date date) {
-        this.date = date;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+    public void setTargetDate(Date targetDate) {
+        this.targetDate = targetDate;
     }
 
 }
