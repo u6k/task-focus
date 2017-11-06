@@ -22,17 +22,17 @@ public class TaskUpdateVO {
     private String name;
 
     @NotNull
+    @DateTimeFormat(pattern = "HH:mm")
+    private Date estimatedStartTimePart;
+
     @Range(min = 0)
-    private int estimatedTime;
+    private Integer estimatedTime;
 
     @DateTimeFormat(pattern = "HH:mm")
-    private Date estimatedStartTime;
+    private Date actualStartTimePart;
 
-    @DateTimeFormat(pattern = "HH:mm")
-    private Date startTime;
-
-    @DateTimeFormat(pattern = "HH:mm")
-    private Date endTime;
+    @Range(min = 0)
+    private Integer actualTime;
 
     public TaskUpdateVO() {
     }
@@ -68,36 +68,36 @@ public class TaskUpdateVO {
         this.name = name;
     }
 
-    public int getEstimatedTime() {
+    public Date getEstimatedStartTimePart() {
+        return estimatedStartTimePart;
+    }
+
+    public void setEstimatedStartTimePart(Date estimatedStartTimePart) {
+        this.estimatedStartTimePart = estimatedStartTimePart;
+    }
+
+    public Integer getEstimatedTime() {
         return estimatedTime;
     }
 
-    public void setEstimatedTime(int estimatedTime) {
+    public void setEstimatedTime(Integer estimatedTime) {
         this.estimatedTime = estimatedTime;
     }
 
-    public Date getEstimatedStartTime() {
-        return estimatedStartTime;
+    public Date getActualStartTimePart() {
+        return actualStartTimePart;
     }
 
-    public void setEstimatedStartTime(Date estimatedStartTime) {
-        this.estimatedStartTime = estimatedStartTime;
+    public void setActualStartTimePart(Date actualStartTimePart) {
+        this.actualStartTimePart = actualStartTimePart;
     }
 
-    public Date getStartTime() {
-        return startTime;
+    public Integer getActualTime() {
+        return actualTime;
     }
 
-    public void setStartTime(Date startTime) {
-        this.startTime = startTime;
-    }
-
-    public Date getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(Date endTime) {
-        this.endTime = endTime;
+    public void setActualTime(Integer actualTime) {
+        this.actualTime = actualTime;
     }
 
 }

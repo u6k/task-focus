@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface TaskRepository extends JpaRepository<Task, UUID> {
 
-    @Query("select t from Task t where t.date = :date order by t.name")
-    List<Task> findByDate(@Param("date") Date date);
+    @Query("select t from Task t where t.estimatedStartTime >= :fromDate and t.estimatedStartTime < :toDate order by t.name")
+    List<Task> findByDate(@Param("fromDate") Date fromDate, @Param("toDate") Date toDate);
 
 }

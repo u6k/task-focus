@@ -19,23 +19,23 @@ body {
         <h1 class="page-header">Update Task</h1>
         <div class="alert alert-danger" role="alert" th:if="${error}" th:text="${error}">エラー</div>
         <form role="form" action="tasks.html" method="post" th:action="@{'/ui/tasks/'+${id}+'/update'}" th:object="${form}">
-            <div class="form-group" th:class="${#fields.hasErrors('date')}? 'form-group has-error' : 'form-group'">
-                <label for="date">作業日</label> <input type="text" class="form-control" id="date" name="date" placeholder="2017/03/23" th:field="*{date}"></input><span class="help-block" th:if="${#fields.hasErrors('date')}" th:errors="*{date}"></span>
+            <div class="form-group has-error" th:class="${#fields.hasErrors('date')}? 'form-group has-error' : 'form-group'">
+                <label for="date">作業日</label><input type="text" class="form-control" id="date" name="date" placeholder="2017-08-14" th:field="*{date}"></input><span class="help-block" th:if="${#fields.hasErrors('date')}" th:errors="*{date}">error</span>
             </div>
             <div class="form-group has-error" th:class="${#fields.hasErrors('name')}? 'form-group has-error' : 'form-group'">
                 <label for="name">作業名</label><input type="text" class="form-control" id="name" name="name" placeholder="本を読む" th:field="*{name}"></input><span class="help-block" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">error</span>
             </div>
+            <div class="form-group has-error" th:class="${#fields.hasErrors('estimatedStartTimePart')}? 'form-group has-error' : 'form-group'">
+                <label for="estimatedStartTimePart">開始予定時刻</label><input type="text" class="form-control" id="estimatedStartTimePart" name="estimatedStartTimePart" placeholder="13:00" th:field="*{estimatedStartTimePart}"></input><span class="help-block" th:if="${#fields.hasErrors('estimatedStartTimePart')}" th:errors="*{estimatedStartTimePart}">error</span>
+            </div>
             <div class="form-group has-error" th:class="${#fields.hasErrors('estimatedTime')}? 'form-group has-error' : 'form-group'">
-                <label for="estimatedTime">見積り時間</label><input type="text" class="form-control" id="estimatedTime" name="estimatedTime" placeholder="60" th:field="*{estimatedTime}"></input><span class="help-block" th:if="${#fields.hasErrors('estimatedTime')}" th:errors="*{estimatedTime}">error</span>
+                <label for="estimatedTime">見積り時間(分)</label><input type="text" class="form-control" id="estimatedTime" name="estimatedTime" placeholder="60" th:field="*{estimatedTime}"></input><span class="help-block" th:if="${#fields.hasErrors('estimatedTime')}" th:errors="*{estimatedTime}">error</span>
             </div>
-            <div class="form-group has-error" th:class="${#fields.hasErrors('estimatedStartTime')}? 'form-group has-error' : 'form-group'">
-                <label for="estimatedStartTime">予定開始時刻</label><input type="text" class="form-control" id="estimatedStartTime" name="estimatedStartTime" placeholder="13:00" th:field="*{estimatedStartTime}"></input><span class="help-block" th:if="${#fields.hasErrors('estimatedStartTime')}" th:errors="*{estimatedStartTime}">error</span>
+            <div class="form-group has-error" th:class="${#fields.hasErrors('actualStartTimePart')}? 'form-group has-error' : 'form-group'">
+                <label for="actualStartTimePart">開始実績時刻</label><input type="text" class="form-control" id="actualStartTimePart" name="actualStartTimePart" placeholder="13:00" th:field="*{actualStartTimePart}"></input><span class="help-block" th:if="${#fields.hasErrors('actualStartTimePart')}" th:errors="*{actualStartTimePart}">error</span>
             </div>
-            <div class="form-group has-error" th:class="${#fields.hasErrors('startTime')}? 'form-group has-error' : 'form-group'">
-                <label for="startTime">開始時刻</label><input type="text" class="form-control" id="startTime" name="startTime" placeholder="13:00" th:field="*{startTime}"></input><span class="help-block" th:if="${#fields.hasErrors('startTime')}" th:errors="*{startTime}">error</span>
-            </div>
-            <div class="form-group has-error" th:class="${#fields.hasErrors('endTime')}? 'form-group has-error' : 'form-group'">
-                <label for="endTime">終了時刻</label><input type="text" class="form-control" id="endTime" name="endTime" placeholder="14:00" th:field="*{endTime}"></input><span class="help-block" th:if="${#fields.hasErrors('endTime')}" th:errors="*{endTime}">error</span>
+            <div class="form-group has-error" th:class="${#fields.hasErrors('actualTime')}? 'form-group has-error' : 'form-group'">
+                <label for="actualTime">実績時間(分)</label><input type="text" class="form-control" id="actualTime" name="actualTime" placeholder="60" th:field="*{actualTime}"></input><span class="help-block" th:if="${#fields.hasErrors('actualTime')}" th:errors="*{actualTime}">error</span>
             </div>
             <div class="form-group">
                 <button type="submit" class="btn btn-success">Update</button>

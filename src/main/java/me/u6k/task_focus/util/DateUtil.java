@@ -38,15 +38,11 @@ public final class DateUtil {
         return format(date, FORMAT_HOUR_MINUTE);
     }
 
-    public static Date toDatetime(Date datePart, Date timePart) {
-        if (timePart == null) {
-            return null;
-        }
+    public static Date buildDatetime(Date datePart, Date hourMinutePart) {
+        String str = formatDate(datePart) + " " + formatHourMinute(hourMinutePart) + ":00.000";
+        Date result = parseFullDatetime(str);
 
-        String str = formatDate(datePart) + " " + formatHourMinute(timePart) + ":00.000";
-        Date date = parseFullDatetime(str);
-
-        return date;
+        return result;
     }
 
     private static String format(Date date, String format) {
