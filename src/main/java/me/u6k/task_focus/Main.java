@@ -14,8 +14,8 @@ public class Main {
 
     @PostConstruct
     public void started() {
-        Locale.setDefault(Locale.US);
-        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+        Locale.setDefault(Locale.JAPANESE);
+        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Tokyo"));
     }
 
     public static void main(String[] args) {
