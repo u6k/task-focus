@@ -622,7 +622,7 @@ public class TaskServiceTest {
                 Task actual = taskList.get(i);
 
                 assertThat(expected.getName(), is(actual.getName()));
-                assertThat(expected.getEstimatedStartTime(), is(actual.getEstimatedStartTime()));
+                assertThat(expected.getEstimatedStartTime().getTime(), is(actual.getEstimatedStartTime().getTime()));
                 assertThat(expected.getEstimatedTime(), is(actual.getEstimatedTime()));
                 if (expected.getActualStartTime() != null) {
                     assertThat(expected.getActualStartTime().getTime(), is(actual.getActualStartTime().getTime()));
