@@ -134,6 +134,7 @@ public class TaskUIController {
         taskUpdateForm.setEstimatedTime(task.getEstimatedTime());
         taskUpdateForm.setActualStartTimePart(task.getActualStartTime());
         taskUpdateForm.setActualTime(task.getActualTime());
+        taskUpdateForm.setDescription(task.getDescription());
         L.debug("setup form: taskUpdateForm={}", taskUpdateForm);
 
         // ページ内容を設定
@@ -180,7 +181,8 @@ public class TaskUIController {
             estimatedStartTime,
             taskUpdateForm.getEstimatedTime(),
             actualStartTime,
-            taskUpdateForm.getActualTime());
+            taskUpdateForm.getActualTime(),
+            taskUpdateForm.getDescription());
         L.debug("taskService.update: success");
 
         /*
