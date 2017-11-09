@@ -61,8 +61,8 @@ public class TaskService {
         return task.getId();
     }
 
-    public void update(UUID id, String name, Date estimatedStartTime, Integer estimatedTime, Date actualStartTime, Integer actualTime) {
-        L.debug("#update: id={}, name={}, estimatedStartTime={}, estimatedTime={}, actualStartTime={}, actualTime={}", id, name, estimatedStartTime, estimatedTime, actualStartTime, actualTime);
+    public void update(UUID id, String name, Date estimatedStartTime, Integer estimatedTime, Date actualStartTime, Integer actualTime, String description) {
+        L.debug("#update: id={}, name={}, estimatedStartTime={}, estimatedTime={}, actualStartTime={}, actualTime={}, description={}", id, name, estimatedStartTime, estimatedTime, actualStartTime, actualTime, description);
 
         /*
          * 前提条件確認
@@ -107,6 +107,7 @@ public class TaskService {
         task.setEstimatedTime(estimatedTime);
         task.setActualStartTime(actualStartTime);
         task.setActualTime(actualTime);
+        task.setDescription(description);
         L.debug("setup Task: task={}", task);
 
         this.taskRepo.save(task);
