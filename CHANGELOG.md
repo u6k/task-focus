@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.0](https://github.com/u6k/task-focus/releases/tag/0.3.0) - 2017-11-09
+
+### Added
+
+- [機能 #5883: タスク更新フォームをform-horizontalにする](https://redmine.u6k.me/issues/5883)
+
 ## [0.2.0](https://github.com/u6k/task-focus/releases/tag/0.2.0) - 2017-11-09
 
 ### Added
