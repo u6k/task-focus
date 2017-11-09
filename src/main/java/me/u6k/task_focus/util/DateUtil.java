@@ -4,7 +4,6 @@ package me.u6k.task_focus.util;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.TimeZone;
 
 public final class DateUtil {
 
@@ -19,7 +18,6 @@ public final class DateUtil {
 
     public static Date parseFullDatetime(String str) {
         SimpleDateFormat formatter = new SimpleDateFormat(FORMAT_FULL_DATETIME);
-        formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
         Date date;
         try {
             date = formatter.parse(str);
