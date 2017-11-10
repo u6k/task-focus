@@ -44,6 +44,7 @@ public class TaskUIController {
         return redirectTasks(null);
     }
 
+    // FIXME: 日付を指定できるため、findTodayはメソッド名として不適切
     @RequestMapping(value = "/ui/tasks", method = RequestMethod.GET)
     public String findToday(@RequestParam(name = "date", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date date,
         @ModelAttribute("taskAddForm") TaskAddVO taskAddForm,
