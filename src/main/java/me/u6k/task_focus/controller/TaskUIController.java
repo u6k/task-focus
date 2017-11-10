@@ -88,6 +88,26 @@ public class TaskUIController {
         return "tasks";
     }
 
+    @RequestMapping(value = "/ui/tasks/{id}", method = RequestMethod.GET)
+    public String findById(@PathVariable String id, @ModelAttribute("changeDateForm") ChangeDateVO changeDateForm, Model model) {
+        L.debug("#findById: id={}, changeDateForm={}", id, changeDateForm);
+
+        /*
+         * ページ内容を構築
+         */
+        // タスクをモデルに設定
+        Task task = this.taskService.findById(UUID.fromString(id));
+        model.addAttribute("task", task);
+        L.debug("setup model: model={}", model);
+
+        // 作業日フォームを設定
+        changeDateForm.setTargetDate(task.getEstimatedStartTime());
+        L.debug("setup form: changeDateForm={}", changeDateForm);
+
+        L.debug("return");
+        return "task";
+    }
+
     @RequestMapping(value = "/ui/tasks/add", method = RequestMethod.POST)
     public String add(@Validated @ModelAttribute("form") TaskAddVO form, BindingResult result, Model model) {
         L.debug("add: form={}, result={}, model={}", form, result, model);
