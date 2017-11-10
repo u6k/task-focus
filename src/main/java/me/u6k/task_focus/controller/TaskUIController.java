@@ -209,7 +209,7 @@ public class TaskUIController {
          * タスク一覧ページにリダイレクト
          */
         L.debug("return");
-        return redirectTasks(taskUpdateForm.getDate());
+        return "redirect:/ui/tasks/" + id;
     }
 
     @RequestMapping(value = "/ui/tasks/{id}/remove", method = RequestMethod.POST)
