@@ -157,6 +157,10 @@ public class TaskUIController {
         taskUpdateForm.setDescription(task.getDescription());
         L.debug("setup form: taskUpdateForm={}", taskUpdateForm);
 
+        // 作業日フォームを設定
+        changeDateForm.setTargetDate(task.getEstimatedStartTime());
+        L.debug("setup form: changeDateForm={}", changeDateForm);
+
         // ページ内容を設定
         model.addAttribute("id", id);
 
