@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.4.0](https://github.com/u6k/task-focus/releases/tag/0.4.0) - 2017-11-11
+
+### Added
+
+- [機能 #5875: 作業に詳細情報を追加したい](https://redmine.u6k.me/issues/5875)
+
 ## [0.3.0](https://github.com/u6k/task-focus/releases/tag/0.3.0) - 2017-11-09
 
 ### Added
