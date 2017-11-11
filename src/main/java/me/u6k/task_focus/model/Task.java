@@ -36,16 +36,20 @@ public class Task {
     @Column(name = "actual_time", nullable = true)
     private Integer actualTime;
 
+    @Column(name = "description", nullable = true, length = 1000000)
+    private String description;
+
     public Task() {
     }
 
-    public Task(UUID id, String name, Date estimatedStartTime, Integer estimatedTime, Date actualStartTime, Integer actualTime) {
+    public Task(UUID id, String name, Date estimatedStartTime, Integer estimatedTime, Date actualStartTime, Integer actualTime, String description) {
         this.id = id;
         this.name = name;
         this.estimatedStartTime = estimatedStartTime;
         this.estimatedTime = estimatedTime;
         this.actualStartTime = actualStartTime;
         this.actualTime = actualTime;
+        this.description = description;
     }
 
     @Override
@@ -109,6 +113,14 @@ public class Task {
 
     public void setActualTime(Integer actualTime) {
         this.actualTime = actualTime;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
 }

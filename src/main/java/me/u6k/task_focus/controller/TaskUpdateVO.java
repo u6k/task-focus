@@ -8,6 +8,7 @@ import javax.validation.constraints.NotNull;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.Range;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -33,6 +34,9 @@ public class TaskUpdateVO {
 
     @Range(min = 0)
     private Integer actualTime;
+
+    @Length(max = 1000000)
+    private String description;
 
     public TaskUpdateVO() {
     }
@@ -98,6 +102,14 @@ public class TaskUpdateVO {
 
     public void setActualTime(Integer actualTime) {
         this.actualTime = actualTime;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
 }

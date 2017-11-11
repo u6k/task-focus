@@ -44,6 +44,7 @@ public class TaskUIController {
         return redirectTasks(null);
     }
 
+    // FIXME: 日付を指定できるため、findTodayはメソッド名として不適切
     @RequestMapping(value = "/ui/tasks", method = RequestMethod.GET)
     public String findToday(@RequestParam(name = "date", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date date,
         @ModelAttribute("taskAddForm") TaskAddVO taskAddForm,
@@ -86,6 +87,26 @@ public class TaskUIController {
 
         L.debug("return");
         return "tasks";
+    }
+
+    @RequestMapping(value = "/ui/tasks/{id}", method = RequestMethod.GET)
+    public String findById(@PathVariable String id, @ModelAttribute("changeDateForm") ChangeDateVO changeDateForm, Model model) {
+        L.debug("#findById: id={}, changeDateForm={}", id, changeDateForm);
+
+        /*
+         * ページ内容を構築
+         */
+        // タスクをモデルに設定
+        Task task = this.taskService.findById(UUID.fromString(id));
+        model.addAttribute("task", task);
+        L.debug("setup model: model={}", model);
+
+        // 作業日フォームを設定
+        changeDateForm.setTargetDate(task.getEstimatedStartTime());
+        L.debug("setup form: changeDateForm={}", changeDateForm);
+
+        L.debug("return");
+        return "task";
     }
 
     @RequestMapping(value = "/ui/tasks/add", method = RequestMethod.POST)
@@ -134,7 +155,12 @@ public class TaskUIController {
         taskUpdateForm.setEstimatedTime(task.getEstimatedTime());
         taskUpdateForm.setActualStartTimePart(task.getActualStartTime());
         taskUpdateForm.setActualTime(task.getActualTime());
+        taskUpdateForm.setDescription(task.getDescription());
         L.debug("setup form: taskUpdateForm={}", taskUpdateForm);
+
+        // 作業日フォームを設定
+        changeDateForm.setTargetDate(task.getEstimatedStartTime());
+        L.debug("setup form: changeDateForm={}", changeDateForm);
 
         // ページ内容を設定
         model.addAttribute("id", id);
@@ -180,14 +206,15 @@ public class TaskUIController {
             estimatedStartTime,
             taskUpdateForm.getEstimatedTime(),
             actualStartTime,
-            taskUpdateForm.getActualTime());
+            taskUpdateForm.getActualTime(),
+            taskUpdateForm.getDescription());
         L.debug("taskService.update: success");
 
         /*
          * タスク一覧ページにリダイレクト
          */
         L.debug("return");
-        return redirectTasks(taskUpdateForm.getDate());
+        return "redirect:/ui/tasks/" + id;
     }
 
     @RequestMapping(value = "/ui/tasks/{id}/remove", method = RequestMethod.POST)

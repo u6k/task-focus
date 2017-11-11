@@ -54,7 +54,7 @@ public class TaskServiceTest {
                     "テスト作業",
                     DateUtil.parseFullDatetime("2017-08-17 23:45:56.000"),
                     60,
-                    new Task(null, "テスト作業", DateUtil.parseFullDatetime("2017-08-17 23:45:56.000"), 60, null, null),
+                    new Task(null, "テスト作業", DateUtil.parseFullDatetime("2017-08-17 23:45:56.000"), 60, null, null, null),
                     null
                 },
                 {
@@ -86,11 +86,11 @@ public class TaskServiceTest {
                     "     テスト作業    ",
                     DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"),
                     60,
-                    new Task(null, "テスト作業", DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"), 60, null, null),
+                    new Task(null, "テスト作業", DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"), 60, null, null, null),
                     null
                 },
                 {
-                    "OK: estimatedStartTimeがnull",
+                    "NG: estimatedStartTimeがnull",
                     "テスト作業",
                     null,
                     60,
@@ -102,7 +102,7 @@ public class TaskServiceTest {
                     "テスト作業",
                     DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"),
                     null,
-                    new Task(null, "テスト作業", DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"), null, null, null),
+                    new Task(null, "テスト作業", DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"), null, null, null, null),
                     null
                 },
                 {
@@ -118,7 +118,7 @@ public class TaskServiceTest {
                     "テスト作業",
                     DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"),
                     0,
-                    new Task(null, "テスト作業", DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"), 0, null, null),
+                    new Task(null, "テスト作業", DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"), 0, null, null, null),
                     null
                 },
             });
@@ -168,15 +168,14 @@ public class TaskServiceTest {
                 assertThat(task.getId(), is(id));
                 assertThat(task.getName(), is(this.result.getName()));
                 assertThat(task.getEstimatedStartTime().getTime(), is(this.result.getEstimatedStartTime().getTime()));
-                if (this.result != null) {
-                    assertThat(task.getEstimatedTime(), is(this.result.getEstimatedTime()));
-                    if (task.getActualStartTime() != null) {
-                        assertThat(task.getActualStartTime().getTime(), is(this.result.getActualStartTime().getTime()));
-                    } else {
-                        assertNull(this.result.getActualStartTime());
-                    }
-                    assertThat(task.getActualTime(), is(this.result.getActualTime()));
+                assertThat(task.getEstimatedTime(), is(this.result.getEstimatedTime()));
+                if (task.getActualStartTime() != null) {
+                    assertThat(task.getActualStartTime().getTime(), is(this.result.getActualStartTime().getTime()));
+                } else {
+                    assertNull(this.result.getActualStartTime());
                 }
+                assertThat(task.getActualTime(), is(this.result.getActualTime()));
+                assertThat(task.getDescription(), is(this.result.getDescription()));
             } catch (Exception e) {
                 // 例外がスローされたのにNG期待値がない場合、失敗
                 if (this.cause == null) {
@@ -240,12 +239,14 @@ public class TaskServiceTest {
                     123,
                     DateUtil.parseFullDatetime("2017-08-11 02:03:04.000"),
                     23,
+                    "テスト詳細情報",
                     new Task(null,
                         "テスト作業 - 更新済み",
                         DateUtil.parseFullDatetime("2017-08-11 01:02:03.000"),
                         123,
                         DateUtil.parseFullDatetime("2017-08-11 02:03:04.000"),
-                        23),
+                        23,
+                        "テスト詳細情報"),
                     null
                 }
             });
@@ -281,9 +282,12 @@ public class TaskServiceTest {
         public Integer actualTime;
 
         @Parameter(6)
-        public Task result;
+        public String description;
 
         @Parameter(7)
+        public Task result;
+
+        @Parameter(8)
         public Exception cause;
 
         @Test
@@ -297,7 +301,8 @@ public class TaskServiceTest {
                     this.estimatedStartTime,
                     this.estimatedTime,
                     this.actualStartTime,
-                    this.actualTime);
+                    this.actualTime,
+                    this.description);
 
                 /*
                  * テスト結果検証
@@ -314,16 +319,14 @@ public class TaskServiceTest {
                 Task task = this.taskRepo.findOne(this.task1.getId());
                 assertThat(task.getName(), is(this.result.getName()));
                 assertThat(task.getEstimatedStartTime().getTime(), is(this.result.getEstimatedStartTime().getTime()));
-
-                if (this.result != null) {
-                    assertThat(task.getEstimatedTime(), is(this.result.getEstimatedTime()));
-                    if (task.getActualStartTime() != null) {
-                        assertThat(task.getActualStartTime().getTime(), is(this.result.getActualStartTime().getTime()));
-                    } else {
-                        assertNull(this.result.getActualStartTime());
-                    }
-                    assertThat(task.getActualTime(), is(this.result.getActualTime()));
+                assertThat(task.getEstimatedTime(), is(this.result.getEstimatedTime()));
+                if (task.getActualStartTime() != null) {
+                    assertThat(task.getActualStartTime().getTime(), is(this.result.getActualStartTime().getTime()));
+                } else {
+                    assertNull(this.result.getActualStartTime());
                 }
+                assertThat(task.getActualTime(), is(this.result.getActualTime()));
+                assertThat(task.getDescription(), is(this.result.getDescription()));
 
                 task = this.taskRepo.findOne(this.task2.getId());
                 assertThat(task, is(this.task2));
@@ -389,19 +392,19 @@ public class TaskServiceTest {
             this.taskRepo.deleteAllInBatch();
 
             // 事前条件準備
-            this.task1 = new Task(UUID.fromString("f37826b7-759a-471e-ab98-e4b7fc406d7a"), "テスト作業1", DateUtil.parseFullDatetime("2017-08-12 23:59:59.999"), null, null, null);
+            this.task1 = new Task(UUID.fromString("f37826b7-759a-471e-ab98-e4b7fc406d7a"), "テスト作業1", DateUtil.parseFullDatetime("2017-08-12 23:59:59.999"), null, null, null, null);
             this.taskRepo.save(this.task1);
 
-            this.task2 = new Task(UUID.fromString("ef089e3b-c51c-4dbf-aec4-0ebbfb00a5c0"), "テスト作業2", DateUtil.parseFullDatetime("2017-08-13 00:00:00.000"), null, null, null);
+            this.task2 = new Task(UUID.fromString("ef089e3b-c51c-4dbf-aec4-0ebbfb00a5c0"), "テスト作業2", DateUtil.parseFullDatetime("2017-08-13 00:00:00.000"), null, null, null, null);
             this.taskRepo.save(this.task2);
 
-            this.task3 = new Task(UUID.fromString("fb018cd8-85a0-4108-99d8-12eb56edfa29"), "テスト作業3", DateUtil.parseFullDatetime("2017-08-13 12:34:56.987"), null, null, null);
+            this.task3 = new Task(UUID.fromString("fb018cd8-85a0-4108-99d8-12eb56edfa29"), "テスト作業3", DateUtil.parseFullDatetime("2017-08-13 12:34:56.987"), null, null, null, null);
             this.taskRepo.save(this.task3);
 
-            this.task4 = new Task(UUID.fromString("e9c212b0-40bf-4cc6-bc9f-f51277f8f5d8"), "テスト作業4", DateUtil.parseFullDatetime("2017-08-13 23:59:59.999"), null, null, null);
+            this.task4 = new Task(UUID.fromString("e9c212b0-40bf-4cc6-bc9f-f51277f8f5d8"), "テスト作業4", DateUtil.parseFullDatetime("2017-08-13 23:59:59.999"), null, null, null, null);
             this.taskRepo.save(this.task4);
 
-            this.task5 = new Task(UUID.fromString("7d5d8e20-2f6a-4aea-9069-b80b54068c02"), "テスト作業5", DateUtil.parseFullDatetime("2017-08-14 00:00:00.000"), null, null, null);
+            this.task5 = new Task(UUID.fromString("7d5d8e20-2f6a-4aea-9069-b80b54068c02"), "テスト作業5", DateUtil.parseFullDatetime("2017-08-14 00:00:00.000"), null, null, null, null);
             this.taskRepo.save(this.task5);
         }
 
@@ -530,46 +533,46 @@ public class TaskServiceTest {
                     false,
                     DateUtil.parseFullDatetime("2017-08-12 00:00:00.000"),
                     Arrays.asList(
-                        new Task(null, "テスト作業0", DateUtil.parseFullDatetime("2017-08-12 23:59:59.999"), null, null, null))
+                        new Task(null, "テスト作業0", DateUtil.parseFullDatetime("2017-08-12 23:59:59.999"), null, null, null, null))
                 },
                 {
                     "OK: 2017/8/12のデータがヒット(2)",
                     false,
                     DateUtil.parseFullDatetime("2017-08-12 23:59:59.999"),
                     Arrays.asList(
-                        new Task(null, "テスト作業0", DateUtil.parseFullDatetime("2017-08-12 23:59:59.999"), null, null, null))
+                        new Task(null, "テスト作業0", DateUtil.parseFullDatetime("2017-08-12 23:59:59.999"), null, null, null, null))
                 },
                 {
                     "OK: 2017/8/13のデータがヒット(1)",
                     false,
                     DateUtil.parseFullDatetime("2017-08-13 00:00:00.000"),
                     Arrays.asList(
-                        new Task(null, "テスト作業1", DateUtil.parseFullDatetime("2017-08-13 00:00:00.000"), null, null, null),
-                        new Task(null, "テスト作業2", DateUtil.parseFullDatetime("2017-08-13 12:34:56.987"), null, null, null),
-                        new Task(null, "テスト作業3", DateUtil.parseFullDatetime("2017-08-13 23:59:59.999"), null, null, null))
+                        new Task(null, "テスト作業1", DateUtil.parseFullDatetime("2017-08-13 00:00:00.000"), null, null, null, null),
+                        new Task(null, "テスト作業2", DateUtil.parseFullDatetime("2017-08-13 12:34:56.987"), null, null, null, null),
+                        new Task(null, "テスト作業3", DateUtil.parseFullDatetime("2017-08-13 23:59:59.999"), null, null, null, null))
                 },
                 {
                     "OK: 2017/8/13のデータがヒット(2)",
                     false,
                     DateUtil.parseFullDatetime("2017-08-13 23:59:59.999"),
                     Arrays.asList(
-                        new Task(null, "テスト作業1", DateUtil.parseFullDatetime("2017-08-13 00:00:00.000"), null, null, null),
-                        new Task(null, "テスト作業2", DateUtil.parseFullDatetime("2017-08-13 12:34:56.987"), null, null, null),
-                        new Task(null, "テスト作業3", DateUtil.parseFullDatetime("2017-08-13 23:59:59.999"), null, null, null))
+                        new Task(null, "テスト作業1", DateUtil.parseFullDatetime("2017-08-13 00:00:00.000"), null, null, null, null),
+                        new Task(null, "テスト作業2", DateUtil.parseFullDatetime("2017-08-13 12:34:56.987"), null, null, null, null),
+                        new Task(null, "テスト作業3", DateUtil.parseFullDatetime("2017-08-13 23:59:59.999"), null, null, null, null))
                 },
                 {
                     "OK: 2017/8/14のデータがヒット(1)",
                     false,
                     DateUtil.parseFullDatetime("2017-08-14 00:00:00.000"),
                     Arrays.asList(
-                        new Task(null, "テスト作業4", DateUtil.parseFullDatetime("2017-08-14 00:00:00.000"), null, null, null))
+                        new Task(null, "テスト作業4", DateUtil.parseFullDatetime("2017-08-14 00:00:00.000"), null, null, null, null))
                 },
                 {
                     "OK: 2017/8/14のデータがヒット(2)",
                     false,
                     DateUtil.parseFullDatetime("2017-08-14 23:59:59.999"),
                     Arrays.asList(
-                        new Task(null, "テスト作業4", DateUtil.parseFullDatetime("2017-08-14 00:00:00.000"), null, null, null))
+                        new Task(null, "テスト作業4", DateUtil.parseFullDatetime("2017-08-14 00:00:00.000"), null, null, null, null))
                 },
                 {
                     "OK: 2017/8/15のデータが0件",
@@ -629,7 +632,8 @@ public class TaskServiceTest {
                 } else {
                     assertNull(actual.getActualStartTime());
                 }
-                assertThat(expected.getActualTime(), is(expected.getActualTime()));
+                assertThat(expected.getActualTime(), is(actual.getActualTime()));
+                assertThat(expected.getDescription(), is(actual.getDescription()));
             }
         }
 
