@@ -52,7 +52,7 @@ body {
                 <p>詳細:</p>
             </dt>
             <dd class="col-sm-10">
-                <p th:text="${task.description} ?: '&nbsp;'">サンプル作業詳細</p>
+                <p id="task-description" th:attr="data-markdown=${task.description}"></p>
             </dd>
             <dt class="col-sm-2">&nbsp;</dt>
             <dd class="col-sm-10">
@@ -70,5 +70,7 @@ body {
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.3.6/marked.min.js"></script>
+    <script src="/js/task.js"></script>
 </body>
 </html>
