@@ -112,27 +112,61 @@ Server:
 
 ### コマンドなど
 
+開発用Dockerイメージをビルド:
+
+```
+$ docker build -t task-focus-dev -f Dockerfile-dev .
+```
+
 Eclipseプロジェクトを作成:
 
 ```
-$ ./mvnw eclipse:eclipse
+$ docker run \
+    --rm \
+    -v $HOME/.m2:/root/.m2 \
+    -v $(pwd):/usr/local/src/task-focus \
+    task-focus-dev \
+        mvn eclipse:eclipse
 ```
 
 ユニット・テスト:
 
 ```
-$ ./mvnw surefire-report:report
+$ docker run \
+    --rm \
+    -v $HOME/.m2:/root/.m2 \
+    -v $(pwd):/usr/local/src/task-focus \
+    task-focus-dev \
+        mvn surefire-report:report
+```
+
+プロジェクト・レポートを出力:
+
+```
+$ docker run \
+    --rm \
+    -v $HOME/.m2:/root/.m2 \
+    -v $(pwd):/usr/local/src/task-focus \
+    task-focus-dev \
+        mvn site
 ```
 
 動作確認:
 
 ```
-$ ./mvnw spring-boot:run
+$ docker run \
+    --rm \
+    -p 8080:8080 \
+    -v $HOME/.m2:/root/.m2 \
+    -v $(pwd):/usr/local/src/task-focus \
+    task-focus-dev \
+        mvn spring-boot:run
 ```
 
 実行用Dockerイメージをビルド:
 
 ```
+# プロジェクト・レポートを出力した後に実行
 $ docker build -t task-focus .
 ```
 
@@ -141,7 +175,7 @@ $ docker build -t task-focus .
 ```
 $ docker run \
     -p 8080:8080 \
-    -v ${HOME}/volumes/task-focus:/var/task-focus \
+    -v ${HOME}/volumes/task-focus:/var/lib/task-focus \
     task-focus
 ```
 

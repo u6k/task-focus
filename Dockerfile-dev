@@ -1,0 +1,9 @@
+FROM maven:3-jdk-8
+LABEL maintainer="u6k.apps@gmail.com"
+
+WORKDIR /usr/local/src/task-focus
+VOLUME /usr/local/src/task-focus
+
+ENV _JAVA_OPTIONS="-Duser.timezone=Asia/Tokyo -Duser.country=JP -Duser.language=ja"
+
+EXPOSE 8080
