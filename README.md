@@ -110,6 +110,8 @@ Server:
  Experimental: false
 ```
 
+- Twitterアプリケーション登録を行い、Consumer KeyとConsumer Secretを取得
+
 ### コマンドなど
 
 開発用Dockerイメージをビルド:
@@ -136,6 +138,8 @@ $ docker run \
     --rm \
     -v $HOME/.m2:/root/.m2 \
     -v $(pwd):/usr/local/src/task-focus \
+    -e APP_TWITTER_CONSUMER_KEY=xxx \
+    -e APP_TWITTER_CONSUMER_SECRET=xxx \
     task-focus-dev \
         mvn surefire-report:report
 ```
@@ -147,6 +151,8 @@ $ docker run \
     --rm \
     -v $HOME/.m2:/root/.m2 \
     -v $(pwd):/usr/local/src/task-focus \
+    -e APP_TWITTER_CONSUMER_KEY=xxx \
+    -e APP_TWITTER_CONSUMER_SECRET=xxx \
     task-focus-dev \
         mvn site
 ```
@@ -159,6 +165,8 @@ $ docker run \
     -p 8080:8080 \
     -v $HOME/.m2:/root/.m2 \
     -v $(pwd):/usr/local/src/task-focus \
+    -e APP_TWITTER_CONSUMER_KEY=xxx \
+    -e APP_TWITTER_CONSUMER_SECRET=xxx \
     task-focus-dev \
         mvn spring-boot:run
 ```
@@ -176,6 +184,8 @@ $ docker build -t task-focus .
 $ docker run \
     -p 8080:8080 \
     -v ${HOME}/volumes/task-focus:/var/lib/task-focus \
+    -e APP_TWITTER_CONSUMER_KEY=xxx \
+    -e APP_TWITTER_CONSUMER_SECRET=xxx \
     task-focus
 ```
 

@@ -33,17 +33,6 @@ public class TaskUIController {
     @Autowired
     private TaskService taskService;
 
-    @RequestMapping(value = "/", method = RequestMethod.GET)
-    public String index() {
-        L.debug("#index:");
-
-        /*
-         * タスク一覧ページにリダイレクト
-         */
-        L.debug("return");
-        return redirectTasks(null);
-    }
-
     // FIXME: 日付を指定できるため、findTodayはメソッド名として不適切
     @RequestMapping(value = "/ui/tasks", method = RequestMethod.GET)
     public String findToday(@RequestParam(name = "date", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date date,
