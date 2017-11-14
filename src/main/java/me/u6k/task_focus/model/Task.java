@@ -7,6 +7,7 @@ import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -39,10 +40,13 @@ public class Task {
     @Column(name = "description", nullable = true, length = 1000000)
     private String description;
 
+    @ManyToOne
+    private User user;
+
     public Task() {
     }
 
-    public Task(UUID id, String name, Date estimatedStartTime, Integer estimatedTime, Date actualStartTime, Integer actualTime, String description) {
+    public Task(UUID id, String name, Date estimatedStartTime, Integer estimatedTime, Date actualStartTime, Integer actualTime, String description, User user) {
         this.id = id;
         this.name = name;
         this.estimatedStartTime = estimatedStartTime;
@@ -50,6 +54,7 @@ public class Task {
         this.actualStartTime = actualStartTime;
         this.actualTime = actualTime;
         this.description = description;
+        this.user = user;
     }
 
     @Override
@@ -121,6 +126,14 @@ public class Task {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
 }

@@ -54,7 +54,7 @@ public class TaskUIController {
         }
         model.addAttribute("date", targetDate);
 
-        List<Task> taskList = this.taskService.findByDate(targetDate);
+        List<Task> taskList = this.taskService.findByDate(UUID.randomUUID() /* FIXME */ , targetDate);
         L.debug("taskService.findByDate: taskList={}", taskList);
 
         List<Task> availableTaskList = taskList.stream()
@@ -86,7 +86,7 @@ public class TaskUIController {
          * ページ内容を構築
          */
         // タスクをモデルに設定
-        Task task = this.taskService.findById(UUID.fromString(id));
+        Task task = this.taskService.findById(UUID.fromString(id), UUID.randomUUID() /* FIXME */ );
         model.addAttribute("task", task);
         L.debug("setup model: model={}", model);
 
@@ -116,7 +116,7 @@ public class TaskUIController {
          */
         Date estimatedStartTime = DateUtils.truncate(form.getDate(), Calendar.DAY_OF_MONTH);
 
-        this.taskService.add(form.getName(), estimatedStartTime, null);
+        this.taskService.add(UUID.randomUUID() /* FIXME */ , form.getName(), estimatedStartTime, null);
         L.debug("taskService.create: success");
 
         /*
@@ -137,7 +137,7 @@ public class TaskUIController {
          * ページ内容、フォームを構築
          */
         // 更新対象タスクを検索、フォームに設定
-        Task task = this.taskService.findById(UUID.fromString(id));
+        Task task = this.taskService.findById(UUID.fromString(id), UUID.randomUUID() /* FIXME */ );
         taskUpdateForm.setDate(task.getEstimatedStartTime());
         taskUpdateForm.setName(task.getName());
         taskUpdateForm.setEstimatedStartTimePart(task.getEstimatedStartTime());
@@ -191,6 +191,7 @@ public class TaskUIController {
 
         // サービスを実行
         this.taskService.update(taskId,
+            UUID.randomUUID() /* TODO */ ,
             taskUpdateForm.getName(),
             estimatedStartTime,
             taskUpdateForm.getEstimatedTime(),
@@ -215,9 +216,9 @@ public class TaskUIController {
          */
         UUID taskId = UUID.fromString(id);
 
-        Task task = this.taskService.findById(taskId);
+        Task task = this.taskService.findById(taskId, UUID.randomUUID() /* FIXME */ );
 
-        this.taskService.remove(taskId);
+        this.taskService.remove(taskId, UUID.randomUUID() /* FIXME */ );
         L.debug("taskService.remove: success");
 
         /*

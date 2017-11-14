@@ -25,8 +25,8 @@ public class TaskService {
     @Autowired
     private TaskRepository taskRepo;
 
-    public UUID add(String name, Date estimatedStartTime, Integer estimatedTime) {
-        L.debug("#add: name={}, estimatedStartTime={}, estimatedTime={}", name, estimatedStartTime, estimatedTime);
+    public UUID add(UUID userId, String name, Date estimatedStartTime, Integer estimatedTime) {
+        L.debug("#add: userId, name={}, estimatedStartTime={}, estimatedTime={}", userId, name, estimatedStartTime, estimatedTime);
 
         /*
          * 前提条件確認
@@ -61,8 +61,8 @@ public class TaskService {
         return task.getId();
     }
 
-    public void update(UUID id, String name, Date estimatedStartTime, Integer estimatedTime, Date actualStartTime, Integer actualTime, String description) {
-        L.debug("#update: id={}, name={}, estimatedStartTime={}, estimatedTime={}, actualStartTime={}, actualTime={}, description={}", id, name, estimatedStartTime, estimatedTime, actualStartTime, actualTime, description);
+    public void update(UUID id, UUID userId, String name, Date estimatedStartTime, Integer estimatedTime, Date actualStartTime, Integer actualTime, String description) {
+        L.debug("#update: id={}, name={}, estimatedStartTime={}, estimatedTime={}, actualStartTime={}, actualTime={}, description={}, userId={}", id, name, estimatedStartTime, estimatedTime, actualStartTime, actualTime, description, userId);
 
         /*
          * 前提条件確認
@@ -114,7 +114,7 @@ public class TaskService {
         L.debug("taskRepo.save: success");
     }
 
-    public void remove(UUID id) {
+    public void remove(UUID id, UUID userId) {
         L.debug("#remove: id={}", id);
 
         /*
@@ -138,7 +138,7 @@ public class TaskService {
         L.debug("taskRepo.delete: success");
     }
 
-    public List<Task> findByDate(Date date) {
+    public List<Task> findByDate(UUID userId, Date date) {
         L.debug("#findByDate: date={}", date);
 
         /*
@@ -156,14 +156,14 @@ public class TaskService {
         Date toDate = DateUtils.addDays(fromDate, 1);
         L.debug("fromDate={}, toDate={}", fromDate, toDate);
 
-        List<Task> taskList = this.taskRepo.findByDate(fromDate, toDate);
+        List<Task> taskList = this.taskRepo.findByDate(userId, fromDate, toDate);
         L.debug("findByDate: taskList.size={}", taskList.size());
 
         L.debug("return: taskList.size={}", taskList.size());
         return taskList;
     }
 
-    public Task findById(UUID id) {
+    public Task findById(UUID id, UUID userId) {
         L.debug("#findById: id={}", id);
 
         /*
