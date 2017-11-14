@@ -138,8 +138,6 @@ $ docker run \
     --rm \
     -v $HOME/.m2:/root/.m2 \
     -v $(pwd):/usr/local/src/task-focus \
-    -e APP_TWITTER_CONSUMER_KEY=xxx \
-    -e APP_TWITTER_CONSUMER_SECRET=xxx \
     task-focus-dev \
         mvn surefire-report:report
 ```
@@ -151,8 +149,6 @@ $ docker run \
     --rm \
     -v $HOME/.m2:/root/.m2 \
     -v $(pwd):/usr/local/src/task-focus \
-    -e APP_TWITTER_CONSUMER_KEY=xxx \
-    -e APP_TWITTER_CONSUMER_SECRET=xxx \
     task-focus-dev \
         mvn site
 ```
