@@ -115,4 +115,10 @@ public class UserService {
         return user;
     }
 
+    void update(User user) {
+        L.debug("#update: user={}", user);
+
+        this.userRepo.save(user);
+    }
+
 }
