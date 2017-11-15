@@ -10,9 +10,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import me.u6k.task_focus.model.SocialAccount;
+import me.u6k.task_focus.model.SocialAccountPK;
+import me.u6k.task_focus.model.SocialAccountRepository;
 import me.u6k.task_focus.model.Task;
 import me.u6k.task_focus.model.TaskRepository;
+import me.u6k.task_focus.model.User;
+import me.u6k.task_focus.model.UserRepository;
 import me.u6k.task_focus.util.DateUtil;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
@@ -22,6 +28,9 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.social.connect.ConnectionRepository;
+import org.springframework.social.twitter.api.Twitter;
 import org.springframework.test.context.TestContextManager;
 
 @RunWith(Enclosed.class)
@@ -31,19 +40,14 @@ public class TaskServiceTest {
 
     @RunWith(Parameterized.class)
     @SpringBootTest
-    public static class add {
+    public static class add extends BaseTest {
 
         @Autowired
         private TaskService taskService;
 
-        @Autowired
-        private TaskRepository taskRepo;
-
         @Before
         public void setup() throws Exception {
-            new TestContextManager(this.getClass()).prepareTestInstance(this);
-
-            this.taskRepo.deleteAllInBatch();
+            super.setup();
         }
 
         @Parameters(name = "{0}")
@@ -54,7 +58,7 @@ public class TaskServiceTest {
                     "テスト作業",
                     DateUtil.parseFullDatetime("2017-08-17 23:45:56.000"),
                     60,
-                    new Task(null, "テスト作業", DateUtil.parseFullDatetime("2017-08-17 23:45:56.000"), 60, null, null, null),
+                    new Task(null, "テスト作業", DateUtil.parseFullDatetime("2017-08-17 23:45:56.000"), 60, null, null, null, null),
                     null
                 },
                 {
@@ -86,7 +90,7 @@ public class TaskServiceTest {
                     "     テスト作業    ",
                     DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"),
                     60,
-                    new Task(null, "テスト作業", DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"), 60, null, null, null),
+                    new Task(null, "テスト作業", DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"), 60, null, null, null, null),
                     null
                 },
                 {
@@ -102,7 +106,7 @@ public class TaskServiceTest {
                     "テスト作業",
                     DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"),
                     null,
-                    new Task(null, "テスト作業", DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"), null, null, null, null),
+                    new Task(null, "テスト作業", DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"), null, null, null, null, null),
                     null
                 },
                 {
@@ -118,7 +122,7 @@ public class TaskServiceTest {
                     "テスト作業",
                     DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"),
                     0,
-                    new Task(null, "テスト作業", DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"), 0, null, null, null),
+                    new Task(null, "テスト作業", DateUtil.parseFullDatetime("2017-08-17 00:00:00.000"), 0, null, null, null, null),
                     null
                 },
             });
@@ -148,7 +152,8 @@ public class TaskServiceTest {
                 /*
                  * テスト実行
                  */
-                UUID id = this.taskService.add(this.name,
+                UUID id = this.taskService.add(this.user2.getId(),
+                    this.name,
                     this.estimatedStartTime,
                     this.estimatedTime);
 
@@ -163,7 +168,7 @@ public class TaskServiceTest {
                 // データ件数を検証
                 assertThat(this.taskRepo.count(), is(1L));
 
-                // データ内容を検証
+                // タスク内容を検証
                 Task task = this.taskRepo.findOne(id);
                 assertThat(task.getId(), is(id));
                 assertThat(task.getName(), is(this.result.getName()));
@@ -176,6 +181,17 @@ public class TaskServiceTest {
                 }
                 assertThat(task.getActualTime(), is(this.result.getActualTime()));
                 assertThat(task.getDescription(), is(this.result.getDescription()));
+
+                // ユーザー内容を検証
+                User actualUser1 = this.userRepo.findOne(this.user1.getId());
+                assertThat(actualUser1.getTasks().size(), is(0));
+
+                User actualUser2 = this.userRepo.findOne(this.user2.getId());
+                assertThat(actualUser2.getTasks().size(), is(1));
+                assertThat(actualUser2.getTasks().get(0).getId(), is(task.getId()));
+
+                User actualUser3 = this.userRepo.findOne(this.user3.getId());
+                assertThat(actualUser3.getTasks().size(), is(0));
             } catch (Exception e) {
                 // 例外がスローされたのにNG期待値がない場合、失敗
                 if (this.cause == null) {
@@ -196,7 +212,7 @@ public class TaskServiceTest {
 
     @RunWith(Parameterized.class)
     @SpringBootTest
-    public static class update {
+    public static class update extends BaseTest {
 
         @Autowired
         private TaskService taskService;
@@ -206,26 +222,25 @@ public class TaskServiceTest {
 
         @Before
         public void setup() throws Exception {
-            // DI準備
-            new TestContextManager(this.getClass()).prepareTestInstance(this);
+            super.setup();
 
-            // 事前条件クリーンアップ
-            this.taskRepo.deleteAllInBatch();
-
-            // 事前条件準備
-            UUID id = this.taskService.add("テスト作業0", DateUtil.parseFullDatetime("2017-08-12 23:59:59.999"), 0);
+            /*
+             * 事前条件準備
+             */
+            // タスクを準備
+            UUID id = this.taskService.add(this.user2.getId(), "テスト作業0", DateUtil.parseFullDatetime("2017-08-12 23:59:59.999"), 0);
             this.task1 = this.taskRepo.findOne(id);
 
-            id = this.taskService.add("テスト作業1", DateUtil.parseFullDatetime("2017-08-13 00:00:00.000"), 0);
+            id = this.taskService.add(this.user2.getId(), "テスト作業1", DateUtil.parseFullDatetime("2017-08-13 00:00:00.000"), 0);
             this.task2 = this.taskRepo.findOne(id);
 
-            id = this.taskService.add("テスト作業2", DateUtil.parseFullDatetime("2017-08-13 12:34:56.987"), 0);
+            id = this.taskService.add(this.user2.getId(), "テスト作業2", DateUtil.parseFullDatetime("2017-08-13 12:34:56.987"), 0);
             this.task3 = this.taskRepo.findOne(id);
 
-            id = this.taskService.add("テスト作業3", DateUtil.parseFullDatetime("2017-08-13 23:59:59.999"), 0);
+            id = this.taskService.add(this.user2.getId(), "テスト作業3", DateUtil.parseFullDatetime("2017-08-13 23:59:59.999"), 0);
             this.task4 = this.taskRepo.findOne(id);
 
-            id = this.taskService.add("テスト作業4", DateUtil.parseFullDatetime("2017-08-14 00:00:00.000"), 0);
+            id = this.taskService.add(this.user2.getId(), "テスト作業4", DateUtil.parseFullDatetime("2017-08-14 00:00:00.000"), 0);
             this.task5 = this.taskRepo.findOne(id);
         }
 
@@ -246,7 +261,8 @@ public class TaskServiceTest {
                         123,
                         DateUtil.parseFullDatetime("2017-08-11 02:03:04.000"),
                         23,
-                        "テスト詳細情報"),
+                        "テスト詳細情報",
+                        null),
                     null
                 }
             });
@@ -297,6 +313,7 @@ public class TaskServiceTest {
                  * テスト実行
                  */
                 this.taskService.update(this.task1.getId(),
+                    this.user2.getId(),
                     this.name,
                     this.estimatedStartTime,
                     this.estimatedTime,
@@ -315,7 +332,7 @@ public class TaskServiceTest {
                 // データ件数を検証
                 assertThat(this.taskRepo.count(), is(5L));
 
-                // データ内容を検証
+                // タスク内容を検証
                 Task task = this.taskRepo.findOne(this.task1.getId());
                 assertThat(task.getName(), is(this.result.getName()));
                 assertThat(task.getEstimatedStartTime().getTime(), is(this.result.getEstimatedStartTime().getTime()));
@@ -339,6 +356,16 @@ public class TaskServiceTest {
 
                 task = this.taskRepo.findOne(this.task5.getId());
                 assertThat(task, is(this.task5));
+
+                // ユーザー内容を検証
+                User actualUser1 = this.userRepo.findOne(this.user1.getId());
+                assertThat(actualUser1.getTasks().size(), is(0));
+
+                User actualUser2 = this.userRepo.findOne(this.user2.getId());
+                assertThat(actualUser2.getTasks().size(), is(5));
+
+                User actualUser3 = this.userRepo.findOne(this.user3.getId());
+                assertThat(actualUser3.getTasks().size(), is(0));
             } catch (Exception e) {
                 // 例外がスローされたのにNG期待値がない場合、失敗
                 if (this.cause == null) {
@@ -375,7 +402,7 @@ public class TaskServiceTest {
 
     @RunWith(Parameterized.class)
     @SpringBootTest
-    public static class remove {
+    public static class remove extends BaseTest {
 
         @Autowired
         private TaskService taskService;
@@ -385,26 +412,25 @@ public class TaskServiceTest {
 
         @Before
         public void setup() throws Exception {
-            // DI準備
-            new TestContextManager(this.getClass()).prepareTestInstance(this);
+            super.setup();
 
-            // 事前条件クリーンアップ
-            this.taskRepo.deleteAllInBatch();
-
-            // 事前条件準備
-            this.task1 = new Task(UUID.fromString("f37826b7-759a-471e-ab98-e4b7fc406d7a"), "テスト作業1", DateUtil.parseFullDatetime("2017-08-12 23:59:59.999"), null, null, null, null);
+            /*
+             * 事前条件準備
+             */
+            // タスクを準備
+            this.task1 = new Task(UUID.fromString("f37826b7-759a-471e-ab98-e4b7fc406d7a"), "テスト作業1", DateUtil.parseFullDatetime("2017-08-12 23:59:59.999"), null, null, null, null, this.user2);
             this.taskRepo.save(this.task1);
 
-            this.task2 = new Task(UUID.fromString("ef089e3b-c51c-4dbf-aec4-0ebbfb00a5c0"), "テスト作業2", DateUtil.parseFullDatetime("2017-08-13 00:00:00.000"), null, null, null, null);
+            this.task2 = new Task(UUID.fromString("ef089e3b-c51c-4dbf-aec4-0ebbfb00a5c0"), "テスト作業2", DateUtil.parseFullDatetime("2017-08-13 00:00:00.000"), null, null, null, null, this.user2);
             this.taskRepo.save(this.task2);
 
-            this.task3 = new Task(UUID.fromString("fb018cd8-85a0-4108-99d8-12eb56edfa29"), "テスト作業3", DateUtil.parseFullDatetime("2017-08-13 12:34:56.987"), null, null, null, null);
+            this.task3 = new Task(UUID.fromString("fb018cd8-85a0-4108-99d8-12eb56edfa29"), "テスト作業3", DateUtil.parseFullDatetime("2017-08-13 12:34:56.987"), null, null, null, null, this.user2);
             this.taskRepo.save(this.task3);
 
-            this.task4 = new Task(UUID.fromString("e9c212b0-40bf-4cc6-bc9f-f51277f8f5d8"), "テスト作業4", DateUtil.parseFullDatetime("2017-08-13 23:59:59.999"), null, null, null, null);
+            this.task4 = new Task(UUID.fromString("e9c212b0-40bf-4cc6-bc9f-f51277f8f5d8"), "テスト作業4", DateUtil.parseFullDatetime("2017-08-13 23:59:59.999"), null, null, null, null, this.user2);
             this.taskRepo.save(this.task4);
 
-            this.task5 = new Task(UUID.fromString("7d5d8e20-2f6a-4aea-9069-b80b54068c02"), "テスト作業5", DateUtil.parseFullDatetime("2017-08-14 00:00:00.000"), null, null, null, null);
+            this.task5 = new Task(UUID.fromString("7d5d8e20-2f6a-4aea-9069-b80b54068c02"), "テスト作業5", DateUtil.parseFullDatetime("2017-08-14 00:00:00.000"), null, null, null, null, this.user2);
             this.taskRepo.save(this.task5);
         }
 
@@ -427,7 +453,7 @@ public class TaskServiceTest {
                     "NG: 作業が存在しない",
                     UUID.fromString("0df2f094-721a-4ad9-946a-34d523d5ee10"),
                     5L,
-                    new IllegalArgumentException("task not found: id=0df2f094-721a-4ad9-946a-34d523d5ee10")
+                    new IllegalArgumentException("task not found: id=0df2f094-721a-4ad9-946a-34d523d5ee10, userId=afda9f7b-c39b-4d4c-96ae-1bc7081c999d")
                 }
             });
         }
@@ -456,11 +482,14 @@ public class TaskServiceTest {
 
         @Test
         public void test() {
+            this.taskRepo.findAll().stream().forEach(System.out::println); // FIXME
             try {
                 /*
                  * テスト実行
                  */
-                this.taskService.remove(this.id);
+                this.taskService.remove(this.id, this.user2.getId());
+
+                this.taskRepo.findAll().stream().forEach(System.out::println); // FIXME
 
                 /*
                  * テスト結果検証
@@ -472,6 +501,16 @@ public class TaskServiceTest {
 
                 // データ件数を検証
                 assertThat(this.taskRepo.count(), is(this.result));
+
+                // ユーザー内容を検証
+                User actualUser1 = this.userRepo.findOne(this.user1.getId());
+                assertThat(actualUser1.getTasks().size(), is(0));
+
+                User actualUser2 = this.userRepo.findOne(this.user2.getId());
+                assertThat(actualUser2.getTasks().size(), is(4));
+
+                User actualUser3 = this.userRepo.findOne(this.user3.getId());
+                assertThat(actualUser3.getTasks().size(), is(0));
             } catch (Exception e) {
                 // 例外がスローされたのにNG期待値がない場合、失敗
                 if (this.cause == null) {
@@ -485,6 +524,16 @@ public class TaskServiceTest {
 
                 // データ件数を検証
                 assertThat(this.taskRepo.count(), is(this.result));
+
+                // ユーザー内容を検証
+                User actualUser1 = this.userRepo.findOne(this.user1.getId());
+                assertThat(actualUser1.getTasks().size(), is(0));
+
+                User actualUser2 = this.userRepo.findOne(this.user2.getId());
+                assertThat(actualUser2.getTasks().size(), is(5));
+
+                User actualUser3 = this.userRepo.findOne(this.user3.getId());
+                assertThat(actualUser3.getTasks().size(), is(0));
             }
         }
 
@@ -492,7 +541,7 @@ public class TaskServiceTest {
 
     @RunWith(Parameterized.class)
     @SpringBootTest
-    public static class findByDate {
+    public static class findByDate extends BaseTest {
 
         @Autowired
         private TaskService taskService;
@@ -502,15 +551,20 @@ public class TaskServiceTest {
 
         @Before
         public void setup() throws Exception {
-            new TestContextManager(this.getClass()).prepareTestInstance(this);
+            super.setup();
 
-            this.taskRepo.deleteAllInBatch();
+            /*
+             * 事前条件準備
+             */
+            // タスクを準備
+            this.taskService.add(this.user2.getId(), "テスト作業0", DateUtil.parseFullDatetime("2017-08-12 23:59:59.999"), null);
+            this.taskService.add(this.user2.getId(), "テスト作業1", DateUtil.parseFullDatetime("2017-08-13 00:00:00.000"), null);
+            this.taskService.add(this.user2.getId(), "テスト作業2", DateUtil.parseFullDatetime("2017-08-13 12:34:56.987"), null);
+            this.taskService.add(this.user2.getId(), "テスト作業3", DateUtil.parseFullDatetime("2017-08-13 23:59:59.999"), null);
+            this.taskService.add(this.user2.getId(), "テスト作業4", DateUtil.parseFullDatetime("2017-08-14 00:00:00.000"), null);
 
-            this.taskService.add("テスト作業0", DateUtil.parseFullDatetime("2017-08-12 23:59:59.999"), null);
-            this.taskService.add("テスト作業1", DateUtil.parseFullDatetime("2017-08-13 00:00:00.000"), null);
-            this.taskService.add("テスト作業2", DateUtil.parseFullDatetime("2017-08-13 12:34:56.987"), null);
-            this.taskService.add("テスト作業3", DateUtil.parseFullDatetime("2017-08-13 23:59:59.999"), null);
-            this.taskService.add("テスト作業4", DateUtil.parseFullDatetime("2017-08-14 00:00:00.000"), null);
+            this.taskService.add(this.user1.getId(), "テスト作業1-0", DateUtil.parseFullDatetime("2017-08-12 23:59:59.999"), null);
+            this.taskService.add(this.user1.getId(), "テスト作業1-1", DateUtil.parseFullDatetime("2017-08-13 00:00:00.000"), null);
         }
 
         @Parameters(name = "{0}")
@@ -533,46 +587,46 @@ public class TaskServiceTest {
                     false,
                     DateUtil.parseFullDatetime("2017-08-12 00:00:00.000"),
                     Arrays.asList(
-                        new Task(null, "テスト作業0", DateUtil.parseFullDatetime("2017-08-12 23:59:59.999"), null, null, null, null))
+                        new Task(null, "テスト作業0", DateUtil.parseFullDatetime("2017-08-12 23:59:59.999"), null, null, null, null, null))
                 },
                 {
                     "OK: 2017/8/12のデータがヒット(2)",
                     false,
                     DateUtil.parseFullDatetime("2017-08-12 23:59:59.999"),
                     Arrays.asList(
-                        new Task(null, "テスト作業0", DateUtil.parseFullDatetime("2017-08-12 23:59:59.999"), null, null, null, null))
+                        new Task(null, "テスト作業0", DateUtil.parseFullDatetime("2017-08-12 23:59:59.999"), null, null, null, null, null))
                 },
                 {
                     "OK: 2017/8/13のデータがヒット(1)",
                     false,
                     DateUtil.parseFullDatetime("2017-08-13 00:00:00.000"),
                     Arrays.asList(
-                        new Task(null, "テスト作業1", DateUtil.parseFullDatetime("2017-08-13 00:00:00.000"), null, null, null, null),
-                        new Task(null, "テスト作業2", DateUtil.parseFullDatetime("2017-08-13 12:34:56.987"), null, null, null, null),
-                        new Task(null, "テスト作業3", DateUtil.parseFullDatetime("2017-08-13 23:59:59.999"), null, null, null, null))
+                        new Task(null, "テスト作業1", DateUtil.parseFullDatetime("2017-08-13 00:00:00.000"), null, null, null, null, null),
+                        new Task(null, "テスト作業2", DateUtil.parseFullDatetime("2017-08-13 12:34:56.987"), null, null, null, null, null),
+                        new Task(null, "テスト作業3", DateUtil.parseFullDatetime("2017-08-13 23:59:59.999"), null, null, null, null, null))
                 },
                 {
                     "OK: 2017/8/13のデータがヒット(2)",
                     false,
                     DateUtil.parseFullDatetime("2017-08-13 23:59:59.999"),
                     Arrays.asList(
-                        new Task(null, "テスト作業1", DateUtil.parseFullDatetime("2017-08-13 00:00:00.000"), null, null, null, null),
-                        new Task(null, "テスト作業2", DateUtil.parseFullDatetime("2017-08-13 12:34:56.987"), null, null, null, null),
-                        new Task(null, "テスト作業3", DateUtil.parseFullDatetime("2017-08-13 23:59:59.999"), null, null, null, null))
+                        new Task(null, "テスト作業1", DateUtil.parseFullDatetime("2017-08-13 00:00:00.000"), null, null, null, null, null),
+                        new Task(null, "テスト作業2", DateUtil.parseFullDatetime("2017-08-13 12:34:56.987"), null, null, null, null, null),
+                        new Task(null, "テスト作業3", DateUtil.parseFullDatetime("2017-08-13 23:59:59.999"), null, null, null, null, null))
                 },
                 {
                     "OK: 2017/8/14のデータがヒット(1)",
                     false,
                     DateUtil.parseFullDatetime("2017-08-14 00:00:00.000"),
                     Arrays.asList(
-                        new Task(null, "テスト作業4", DateUtil.parseFullDatetime("2017-08-14 00:00:00.000"), null, null, null, null))
+                        new Task(null, "テスト作業4", DateUtil.parseFullDatetime("2017-08-14 00:00:00.000"), null, null, null, null, null))
                 },
                 {
                     "OK: 2017/8/14のデータがヒット(2)",
                     false,
                     DateUtil.parseFullDatetime("2017-08-14 23:59:59.999"),
                     Arrays.asList(
-                        new Task(null, "テスト作業4", DateUtil.parseFullDatetime("2017-08-14 00:00:00.000"), null, null, null, null))
+                        new Task(null, "テスト作業4", DateUtil.parseFullDatetime("2017-08-14 00:00:00.000"), null, null, null, null, null))
                 },
                 {
                     "OK: 2017/8/15のデータが0件",
@@ -597,8 +651,6 @@ public class TaskServiceTest {
 
         @Test
         public void test() {
-            this.taskRepo.findAll().forEach(System.out::println); // FIXME
-
             /*
              * 事前準備
              */
@@ -611,7 +663,7 @@ public class TaskServiceTest {
             /*
              * テスト実行
              */
-            List<Task> taskList = this.taskService.findByDate(this.date);
+            List<Task> taskList = this.taskService.findByDate(this.user2.getId(), this.date);
 
             /*
              * テスト結果検証
@@ -635,6 +687,79 @@ public class TaskServiceTest {
                 assertThat(expected.getActualTime(), is(actual.getActualTime()));
                 assertThat(expected.getDescription(), is(actual.getDescription()));
             }
+        }
+
+    }
+
+    static class BaseTest {
+
+        @Autowired
+        UserRepository userRepo;
+
+        @Autowired
+        SocialAccountRepository socialAccountRepo;
+
+        @Autowired
+        TaskRepository taskRepo;
+
+        @MockBean
+        Twitter twitter;
+
+        @MockBean
+        ConnectionRepository connectionRepo;
+
+        User user1;
+
+        SocialAccount socialAccount1;
+
+        User user2;
+
+        SocialAccount socialAccount2;
+
+        User user3;
+
+        SocialAccount socialAccount3;
+
+        void setup() throws Exception {
+            /*
+             * DI設定
+             */
+            new TestContextManager(this.getClass()).prepareTestInstance(this);
+
+            /*
+             * 事前条件準備
+             */
+            // クリーンアップ
+            this.teardown();
+
+            // ユーザーを準備
+            this.user1 = new User(UUID.fromString("cf8474f1-ab98-410a-8444-04c9a91192da"), "foo", "ja", "Asia/Tokyo");
+            this.userRepo.save(this.user1);
+
+            this.socialAccount1 = new SocialAccount(new SocialAccountPK("twitter", "11111"), "foo", this.user1);
+            this.socialAccountRepo.save(this.socialAccount1);
+
+            this.user2 = new User(UUID.fromString("afda9f7b-c39b-4d4c-96ae-1bc7081c999d"), "bar", "ja", "Asia/Tokyo");
+            this.userRepo.save(this.user2);
+
+            this.socialAccount2 = new SocialAccount(new SocialAccountPK("twitter", "22222"), "bar", this.user2);
+            this.socialAccountRepo.save(this.socialAccount2);
+
+            this.user3 = new User(UUID.fromString("10e8974a-8613-4f9c-8bfd-996cfd4c7d9a"), "boo", "ja", "Asia/Tokyo");
+            this.userRepo.save(this.user3);
+
+            this.socialAccount3 = new SocialAccount(new SocialAccountPK("twitter", "33333"), "bar", this.user3);
+            this.socialAccountRepo.save(this.socialAccount3);
+        }
+
+        @After
+        public void teardown() {
+            /*
+             * 事後状態クリーンアップ
+             */
+            this.taskRepo.deleteAllInBatch();
+            this.socialAccountRepo.deleteAllInBatch();
+            this.userRepo.deleteAllInBatch();
         }
 
     }

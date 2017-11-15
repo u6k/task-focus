@@ -5,9 +5,11 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import me.u6k.task_focus.model.Task;
 import me.u6k.task_focus.model.TaskRepository;
+import me.u6k.task_focus.model.User;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
@@ -23,15 +25,21 @@ public class TaskService {
     private static final Logger L = LoggerFactory.getLogger(TaskService.class);
 
     @Autowired
+    private UserService userService;
+
+    @Autowired
     private TaskRepository taskRepo;
 
     public UUID add(UUID userId, String name, Date estimatedStartTime, Integer estimatedTime) {
-        L.debug("#add: userId, name={}, estimatedStartTime={}, estimatedTime={}", userId, name, estimatedStartTime, estimatedTime);
+        L.debug("#add: userId={}, name={}, estimatedStartTime={}, estimatedTime={}", userId, name, estimatedStartTime, estimatedTime);
 
         /*
          * 前提条件確認
          */
         // 入力チェック
+        if (userId == null) {
+            throw new IllegalArgumentException("userId is null");
+        }
         if (StringUtils.isBlank(name)) {
             throw new IllegalArgumentException("name is blank");
         }
@@ -44,6 +52,12 @@ public class TaskService {
             }
         }
 
+        // ユーザーの存在確認
+        User user = this.userService.findById(userId);
+        if (user == null) {
+            throw new IllegalArgumentException("user not found: userId=" + userId);
+        }
+
         /*
          * タスクを保存
          */
@@ -52,6 +66,7 @@ public class TaskService {
         task.setName(name != null ? name.trim() : null);
         task.setEstimatedStartTime(estimatedStartTime);
         task.setEstimatedTime(estimatedTime);
+        task.setUser(user);
         L.debug("new Task: task={}", task);
 
         this.taskRepo.save(task);
@@ -62,7 +77,7 @@ public class TaskService {
     }
 
     public void update(UUID id, UUID userId, String name, Date estimatedStartTime, Integer estimatedTime, Date actualStartTime, Integer actualTime, String description) {
-        L.debug("#update: id={}, name={}, estimatedStartTime={}, estimatedTime={}, actualStartTime={}, actualTime={}, description={}, userId={}", id, name, estimatedStartTime, estimatedTime, actualStartTime, actualTime, description, userId);
+        L.debug("#update: id={}, userId={}, name={}, estimatedStartTime={}, estimatedTime={}, actualStartTime={}, actualTime={}, description={}, userId={}", id, userId, name, estimatedStartTime, estimatedTime, actualStartTime, actualTime, description, userId);
 
         /*
          * 前提条件確認
@@ -70,6 +85,9 @@ public class TaskService {
         // 入力チェック
         if (id == null) {
             throw new IllegalArgumentException("id is null");
+        }
+        if (userId == null) {
+            throw new IllegalArgumentException("userId is null");
         }
         if (StringUtils.isBlank(name)) {
             throw new IllegalArgumentException("name is blank");
@@ -93,15 +111,25 @@ public class TaskService {
             }
         }
 
+        // ユーザーの存在確認
+        User user = this.userService.findById(userId);
+        if (user == null) {
+            throw new IllegalArgumentException("user not found: userId=" + userId);
+        }
+
         // タスクの存在確認
-        Task task = this.taskRepo.findOne(id);
-        if (task == null) {
-            throw new IllegalArgumentException("task not found: id=" + id);
+        List<Task> tasks = user.getTasks().stream()
+            .filter(x -> x.getId().equals(id))
+            .collect(Collectors.toList());
+
+        if (tasks.size() == 0) {
+            throw new IllegalArgumentException("task not found: id=" + id + ", userId=" + userId);
         }
 
         /*
          * タスクを保存
          */
+        Task task = tasks.get(0);
         task.setName(name != null ? name.trim() : null);
         task.setEstimatedStartTime(estimatedStartTime);
         task.setEstimatedTime(estimatedTime);
@@ -115,7 +143,7 @@ public class TaskService {
     }
 
     public void remove(UUID id, UUID userId) {
-        L.debug("#remove: id={}", id);
+        L.debug("#remove: id={}, userId={}", id, userId);
 
         /*
          * 前提条件確認
@@ -124,27 +152,40 @@ public class TaskService {
         if (id == null) {
             throw new IllegalArgumentException("id is null");
         }
+        if (userId == null) {
+            throw new IllegalArgumentException("userId is null");
+        }
+
+        // ユーザーの存在確認
+        User user = this.userService.findById(userId);
 
         // タスクの存在確認
-        Task task = this.taskRepo.findOne(id);
-        if (task == null) {
-            throw new IllegalArgumentException("task not found: id=" + id);
+        if (user.getTasks().stream()
+            .filter(x -> x.getId().equals(id))
+            .count() == 0) {
+            throw new IllegalArgumentException("task not found: id=" + id + ", userId=" + userId);
         }
 
         /*
          * タスクを削除
          */
-        this.taskRepo.delete(task);
-        L.debug("taskRepo.delete: success");
+        // ユーザーが持つタスクを削除
+        user.getTasks().removeIf(x -> x.getId().equals(id));
+        // ユーザーを更新することで、タスクの削除を反映
+        this.userService.update(user);
+        L.debug("task remove: success");
     }
 
     public List<Task> findByDate(UUID userId, Date date) {
-        L.debug("#findByDate: date={}", date);
+        L.debug("#findByDate: userId={}, date={}", userId, date);
 
         /*
          * 前提条件確認
          */
         // 入力チェック
+        if (userId == null) {
+            throw new IllegalArgumentException("userId is null");
+        }
         if (date == null) {
             throw new IllegalArgumentException("date is null");
         }
@@ -164,7 +205,7 @@ public class TaskService {
     }
 
     public Task findById(UUID id, UUID userId) {
-        L.debug("#findById: id={}", id);
+        L.debug("#findById: id={}, userId={}", id, userId);
 
         /*
          * 前提条件確認
@@ -173,12 +214,27 @@ public class TaskService {
         if (id == null) {
             throw new IllegalArgumentException("id is null");
         }
+        if (userId == null) {
+            throw new IllegalArgumentException("userId is null");
+        }
+
+        // ユーザーの存在確認
+        User user = this.userService.findById(userId);
+        if (user == null) {
+            throw new IllegalArgumentException("user not found: userId=" + userId);
+        }
 
         /*
-         * タスクを検索
+         * タスクを取得
          */
-        Task task = this.taskRepo.findOne(id);
-        L.debug("findOne: task={}", task);
+        List<Task> tasks = user.getTasks().stream()
+            .filter(x -> x.getId().equals(id))
+            .collect(Collectors.toList());
+
+        Task task = null;
+        if (tasks.size() != 0) {
+            task = tasks.get(0);
+        }
 
         L.debug("return: task={}", task);
         return task;
