@@ -2,7 +2,6 @@
 package me.u6k.task_focus.service;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.beans.SamePropertyValuesAs.*;
 import static org.junit.Assert.*;
 
 import java.util.List;
@@ -19,6 +18,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.social.connect.ConnectionRepository;
 import org.springframework.social.twitter.api.AccountSettings;
 import org.springframework.social.twitter.api.BlockOperations;
 import org.springframework.social.twitter.api.DirectMessageOperations;
@@ -50,6 +51,12 @@ public class UserServiceTest {
 
     @Autowired
     private SocialAccountRepository socialAccountRepo;
+
+    @MockBean
+    private Twitter twitter;
+
+    @MockBean
+    private ConnectionRepository connectionRepository;
 
     private User user1;
 
@@ -104,31 +111,31 @@ public class UserServiceTest {
         /*
          * テスト結果検証
          */
-        assertThat(this.userRepo.count(), is(4));
+        assertThat(this.userRepo.count(), is(4L));
 
         User actualUser1 = this.userRepo.findOne(this.user1.getId());
-        assertThat(actualUser1, is(samePropertyValuesAs(this.user1)));
+        assertThat(actualUser1, is(this.user1));
         assertThat(actualUser1.getSocialAccounts().size(), is(1));
-        assertThat(actualUser1.getSocialAccounts().get(0), is(samePropertyValuesAs(this.socialAccount1)));
+        assertThat(actualUser1.getSocialAccounts().get(0), is(this.socialAccount1));
 
         User actualUser2 = this.userRepo.findOne(this.user2.getId());
-        assertThat(actualUser2, is(samePropertyValuesAs(this.user2)));
+        assertThat(actualUser2, is(this.user2));
         assertThat(actualUser2.getSocialAccounts().size(), is(1));
-        assertThat(actualUser2.getSocialAccounts().get(0), is(samePropertyValuesAs(this.socialAccount2)));
+        assertThat(actualUser2.getSocialAccounts().get(0), is(this.socialAccount2));
 
         User actualUser3 = this.userRepo.findOne(this.user3.getId());
-        assertThat(actualUser3, is(samePropertyValuesAs(this.user3)));
+        assertThat(actualUser3, is(this.user3));
         assertThat(actualUser3.getSocialAccounts().size(), is(1));
-        assertThat(actualUser3.getSocialAccounts().get(0), is(samePropertyValuesAs(this.socialAccount3)));
+        assertThat(actualUser3.getSocialAccounts().get(0), is(this.socialAccount3));
 
         User actualUser4 = this.userRepo.findOne(userId);
         assertThat(actualUser4.getLocation(), is("en"));
         assertThat(actualUser4.getName(), is("hoge"));
         assertThat(actualUser4.getTimeZone(), is("UTC"));
         assertThat(actualUser4.getSocialAccounts().size(), is(1));
-        assertThat(actualUser4.getSocialAccounts().get(1).getKey().getProviderId(), is("twitter"));
-        assertThat(actualUser4.getSocialAccounts().get(1).getKey().getProviderUserId(), is("44444"));
-        assertThat(actualUser4.getSocialAccounts().get(1).getName(), is("hoge"));
+        assertThat(actualUser4.getSocialAccounts().get(0).getKey().getProviderId(), is("twitter"));
+        assertThat(actualUser4.getSocialAccounts().get(0).getKey().getProviderUserId(), is("44444"));
+        assertThat(actualUser4.getSocialAccounts().get(0).getName(), is("hoge"));
     }
 
     @Test
@@ -148,22 +155,22 @@ public class UserServiceTest {
          */
         assertThat(userId, is(this.user2.getId()));
 
-        assertThat(this.userRepo.count(), is(3));
+        assertThat(this.userRepo.count(), is(3L));
 
         User actualUser1 = this.userRepo.findOne(this.user1.getId());
-        assertThat(actualUser1, is(samePropertyValuesAs(this.user1)));
+        assertThat(actualUser1, is(this.user1));
         assertThat(actualUser1.getSocialAccounts().size(), is(1));
-        assertThat(actualUser1.getSocialAccounts().get(0), is(samePropertyValuesAs(this.socialAccount1)));
+        assertThat(actualUser1.getSocialAccounts().get(0), is(this.socialAccount1));
 
         User actualUser2 = this.userRepo.findOne(this.user2.getId());
-        assertThat(actualUser2, is(samePropertyValuesAs(this.user2)));
+        assertThat(actualUser2, is(this.user2));
         assertThat(actualUser2.getSocialAccounts().size(), is(1));
-        assertThat(actualUser2.getSocialAccounts().get(0), is(samePropertyValuesAs(this.socialAccount2)));
+        assertThat(actualUser2.getSocialAccounts().get(0), is(this.socialAccount2));
 
         User actualUser3 = this.userRepo.findOne(this.user3.getId());
-        assertThat(actualUser3, is(samePropertyValuesAs(this.user3)));
+        assertThat(actualUser3, is(this.user3));
         assertThat(actualUser3.getSocialAccounts().size(), is(1));
-        assertThat(actualUser3.getSocialAccounts().get(0), is(samePropertyValuesAs(this.socialAccount3)));
+        assertThat(actualUser3.getSocialAccounts().get(0), is(this.socialAccount3));
     }
 
     @Test
@@ -192,7 +199,7 @@ public class UserServiceTest {
         /*
          * テスト結果検証
          */
-        assertThat(actualUser, is(samePropertyValuesAs(this.user2)));
+        assertThat(actualUser, is(this.user2));
     }
 
     @Test
