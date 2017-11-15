@@ -13,6 +13,7 @@ import me.u6k.task_focus.model.SocialAccountPK;
 import me.u6k.task_focus.model.SocialAccountRepository;
 import me.u6k.task_focus.model.User;
 import me.u6k.task_focus.model.UserRepository;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -73,8 +74,7 @@ public class UserServiceTest {
     @Before
     public void setup() {
         // 事前条件クリーンアップ
-        this.socialAccountRepo.deleteAllInBatch();
-        this.userRepo.deleteAllInBatch();
+        this.teardown();
 
         // 事前条件準備
         this.user1 = new User(UUID.randomUUID(), "foo", "ja", "Asia/Tokyo");
@@ -94,6 +94,13 @@ public class UserServiceTest {
 
         this.socialAccount3 = new SocialAccount(new SocialAccountPK("twitter", "33333"), "bar", this.user3);
         this.socialAccountRepo.save(this.socialAccount3);
+    }
+
+    @After
+    public void teardown() {
+        // 事後状態クリーンアップ
+        this.socialAccountRepo.deleteAllInBatch();
+        this.userRepo.deleteAllInBatch();
     }
 
     @Test
