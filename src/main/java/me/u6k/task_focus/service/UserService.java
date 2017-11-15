@@ -96,4 +96,23 @@ public class UserService {
         }
     }
 
+    public User findById(UUID userId) {
+        L.debug("#findById: userId={}", userId);
+
+        /*
+         * 前提条件確認
+         */
+        if (userId == null) {
+            throw new IllegalArgumentException("userId is null");
+        }
+
+        /*
+         * ユーザーを検索
+         */
+        User user = this.userRepo.findOne(userId);
+        L.debug("findOne: user={}", user);
+
+        return user;
+    }
+
 }

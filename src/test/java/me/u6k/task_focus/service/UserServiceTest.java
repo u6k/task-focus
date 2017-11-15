@@ -231,6 +231,53 @@ public class UserServiceTest {
         }
     }
 
+    @Test
+    public void findById_取得できる() {
+        /*
+         * テスト条件設定
+         */
+        UUID userId = UUID.fromString(this.user2.getId().toString());
+
+        /*
+         * テスト実行
+         */
+        User actualUser = this.userService.findById(userId);
+
+        /*
+         * テスト結果検証
+         */
+        assertThat(actualUser, is(this.user2));
+    }
+
+    @Test
+    public void findById_ユーザーが存在しない場合はnullを返す() {
+        /*
+         * テスト条件設定
+         */
+        UUID userId = UUID.randomUUID();
+
+        /*
+         * テスト実行
+         */
+        User actualUser = this.userService.findById(userId);
+
+        /*
+         * テスト結果検証
+         */
+        assertNull(actualUser);
+    }
+
+    @Test
+    public void findById_引数がnull() {
+        try {
+            this.userService.findById(null);
+
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), is("userId is null"));
+        }
+    }
+
     private class TwitterImpl implements Twitter {
 
         private UserOperations userOperations;
