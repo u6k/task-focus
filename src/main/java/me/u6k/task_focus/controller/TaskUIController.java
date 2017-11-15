@@ -8,13 +8,18 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import me.u6k.task_focus.model.Task;
+import me.u6k.task_focus.model.User;
 import me.u6k.task_focus.service.TaskService;
+import me.u6k.task_focus.service.UserService;
 import me.u6k.task_focus.util.DateUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.social.connect.ConnectionRepository;
+import org.springframework.social.twitter.api.Twitter;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -31,15 +36,33 @@ public class TaskUIController {
     private static final Logger L = LoggerFactory.getLogger(TaskUIController.class);
 
     @Autowired
+    private Twitter twitter;
+
+    @Autowired
+    private ConnectionRepository connectionRepository;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
     private TaskService taskService;
 
     // FIXME: 日付を指定できるため、findTodayはメソッド名として不適切
-    @RequestMapping(value = "/ui/tasks", method = RequestMethod.GET)
-    public String findToday(@RequestParam(name = "date", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date date,
+    @RequestMapping(value = "/ui/users/{userId}/tasks", method = RequestMethod.GET)
+    public String findToday(@PathVariable(name = "userId") String userId,
+        @RequestParam(name = "date", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date date,
         @ModelAttribute("taskAddForm") TaskAddVO taskAddForm,
         @ModelAttribute("changeDateForm") ChangeDateVO changeDateForm,
         Model model) {
-        L.debug("#list: date={}, taskAddForm={}, changeDateForm={}, model={}", date, taskAddForm, changeDateForm, model);
+        L.debug("#list: userId={}, date={}, taskAddForm={}, changeDateForm={}, model={}", userId, date, taskAddForm, changeDateForm, model);
+
+        /*
+         * 事前条件チェック
+         */
+        User user = this.findUserByTwitter(userId);
+        if (user == null) {
+            return "redirect:/";
+        }
 
         /*
          * ページ内容、フォームを構築
@@ -48,13 +71,15 @@ public class TaskUIController {
         changeDateForm.setTargetDate(date);
 
         // タスク一覧部分を構築
+        model.addAttribute("user", user);
+
         Date targetDate = date;
         if (targetDate == null) {
             targetDate = new Date();
         }
         model.addAttribute("date", targetDate);
 
-        List<Task> taskList = this.taskService.findByDate(UUID.randomUUID() /* FIXME */ , targetDate);
+        List<Task> taskList = this.taskService.findByDate(user.getId(), targetDate);
         L.debug("taskService.findByDate: taskList={}", taskList);
 
         List<Task> availableTaskList = taskList.stream()
@@ -78,15 +103,28 @@ public class TaskUIController {
         return "tasks";
     }
 
-    @RequestMapping(value = "/ui/tasks/{id}", method = RequestMethod.GET)
-    public String findById(@PathVariable String id, @ModelAttribute("changeDateForm") ChangeDateVO changeDateForm, Model model) {
-        L.debug("#findById: id={}, changeDateForm={}", id, changeDateForm);
+    @RequestMapping(value = "/ui/users/{userId}/tasks/{id}", method = RequestMethod.GET)
+    public String findById(@PathVariable(name = "userId") String userId,
+        @PathVariable(name = "id") String id,
+        @ModelAttribute("changeDateForm") ChangeDateVO changeDateForm,
+        Model model) {
+        L.debug("#findById: userId={}, id={}, changeDateForm={}", userId, id, changeDateForm);
+
+        /*
+         * 事前条件チェック
+         */
+        User user = this.findUserByTwitter(userId);
+        if (user == null) {
+            return "redirect:/";
+        }
 
         /*
          * ページ内容を構築
          */
+        model.addAttribute("user", user);
+
         // タスクをモデルに設定
-        Task task = this.taskService.findById(UUID.fromString(id), UUID.randomUUID() /* FIXME */ );
+        Task task = this.taskService.findById(UUID.fromString(id), user.getId());
         model.addAttribute("task", task);
         L.debug("setup model: model={}", model);
 
@@ -98,17 +136,26 @@ public class TaskUIController {
         return "task";
     }
 
-    @RequestMapping(value = "/ui/tasks/add", method = RequestMethod.POST)
-    public String add(@Validated @ModelAttribute("form") TaskAddVO form, BindingResult result, Model model) {
-        L.debug("add: form={}, result={}, model={}", form, result, model);
+    @RequestMapping(value = "/ui/users/{userId}/tasks/add", method = RequestMethod.POST)
+    public String add(@PathVariable(name = "userId") String userId,
+        @Validated @ModelAttribute("form") TaskAddVO form,
+        BindingResult result, Model model) {
+        L.debug("add: userId={}, form={}, result={}, model={}", userId, form, result, model);
 
         /*
-         * 入力チェック
+         * 事前条件チェック
          */
+        // 権限チェック
+        User user = this.findUserByTwitter(userId);
+        if (user == null) {
+            return "redirect:/";
+        }
+
+        // 入力チェック
         L.debug("validate: hasErrors={}", result.hasErrors());
         if (result.hasErrors()) {
             L.debug("return");
-            return redirectTasks(null);
+            return redirectTasks(user, null);
         }
 
         /*
@@ -116,28 +163,39 @@ public class TaskUIController {
          */
         Date estimatedStartTime = DateUtils.truncate(form.getDate(), Calendar.DAY_OF_MONTH);
 
-        this.taskService.add(UUID.randomUUID() /* FIXME */ , form.getName(), estimatedStartTime, null);
+        this.taskService.add(user.getId(), form.getName(), estimatedStartTime, null);
         L.debug("taskService.create: success");
 
         /*
          * タスク一覧ページにリダイレクト
          */
         L.debug("return");
-        return redirectTasks(form.getDate());
+        return redirectTasks(user, form.getDate());
     }
 
-    @RequestMapping(value = "/ui/tasks/{id}/update", method = RequestMethod.GET)
-    public String updateInit(@PathVariable String id,
+    @RequestMapping(value = "/ui/users/{userId}/tasks/{id}/update", method = RequestMethod.GET)
+    public String updateInit(@PathVariable(name = "userId") String userId,
+        @PathVariable(name = "id") String id,
         @ModelAttribute("taskUpdateForm") TaskUpdateVO taskUpdateForm,
         @ModelAttribute("changeDateForm") ChangeDateVO changeDateForm,
         Model model) {
-        L.debug("#updateInit: id={}, taskUpdateForm={}, changeDateForm={}, model={}", id, taskUpdateForm, changeDateForm, model);
+        L.debug("#updateInit: userId={}, id={}, taskUpdateForm={}, changeDateForm={}, model={}", userId, id, taskUpdateForm, changeDateForm, model);
+
+        /*
+         * 事前条件チェック
+         */
+        User user = this.findUserByTwitter(userId);
+        if (user == null) {
+            return "redirect:/";
+        }
 
         /*
          * ページ内容、フォームを構築
          */
+        model.addAttribute("user", user);
+
         // 更新対象タスクを検索、フォームに設定
-        Task task = this.taskService.findById(UUID.fromString(id), UUID.randomUUID() /* FIXME */ );
+        Task task = this.taskService.findById(UUID.fromString(id), user.getId());
         taskUpdateForm.setDate(task.getEstimatedStartTime());
         taskUpdateForm.setName(task.getName());
         taskUpdateForm.setEstimatedStartTimePart(task.getEstimatedStartTime());
@@ -160,17 +218,25 @@ public class TaskUIController {
         return "tasks-update";
     }
 
-    @RequestMapping(value = "/ui/tasks/{id}/update", method = RequestMethod.POST)
-    public String update(@PathVariable String id,
+    @RequestMapping(value = "/ui/users/{userId}/tasks/{id}/update", method = RequestMethod.POST)
+    public String update(@PathVariable(name = "userId") String userId,
+        @PathVariable(name = "id") String id,
         @Validated @ModelAttribute("taskUpdateForm") TaskUpdateVO taskUpdateForm,
         @ModelAttribute("changeDateForm") ChangeDateVO changeDateForm,
         BindingResult result,
         Model model) {
-        L.debug("update: id={}, taskUpdateForm={}, changeDateForm={}, result={}, model={}", id, taskUpdateForm, changeDateForm, result, model);
+        L.debug("update: userId={}, id={}, taskUpdateForm={}, changeDateForm={}, result={}, model={}", userId, id, taskUpdateForm, changeDateForm, result, model);
 
         /*
-         * 入力チェック
+         * 事前条件チェック
          */
+        // 権限チェック
+        User user = this.findUserByTwitter(userId);
+        if (user == null) {
+            return "redirect:/";
+        }
+
+        // 入力チェック
         L.debug("validate: hasErrors={}", result.hasErrors());
         if (result.hasErrors()) {
             L.debug("return");
@@ -191,7 +257,7 @@ public class TaskUIController {
 
         // サービスを実行
         this.taskService.update(taskId,
-            UUID.randomUUID() /* TODO */ ,
+            user.getId(),
             taskUpdateForm.getName(),
             estimatedStartTime,
             taskUpdateForm.getEstimatedTime(),
@@ -204,59 +270,100 @@ public class TaskUIController {
          * タスク一覧ページにリダイレクト
          */
         L.debug("return");
-        return "redirect:/ui/tasks/" + id;
+        return "redirect:/ui/users/" + user.getId() + "/tasks/" + id;
     }
 
-    @RequestMapping(value = "/ui/tasks/{id}/remove", method = RequestMethod.POST)
-    public String remove(@PathVariable String id) {
-        L.debug("remove: id={}", id);
+    @RequestMapping(value = "/ui/users/{userId}/tasks/{id}/remove", method = RequestMethod.POST)
+    public String remove(@PathVariable(name = "userId") String userId, @PathVariable(name = "id") String id) {
+        L.debug("remove: userId={}, id={}", userId, id);
+
+        /*
+         * 事前条件チェック
+         */
+        User user = this.findUserByTwitter(userId);
+        if (user == null) {
+            return "redirect:/";
+        }
 
         /*
          * タスク削除サービスを実行
          */
         UUID taskId = UUID.fromString(id);
 
-        Task task = this.taskService.findById(taskId, UUID.randomUUID() /* FIXME */ );
+        Task task = this.taskService.findById(taskId, user.getId());
 
-        this.taskService.remove(taskId, UUID.randomUUID() /* FIXME */ );
+        this.taskService.remove(taskId, user.getId());
         L.debug("taskService.remove: success");
 
         /*
          * タスク一覧ページにリダイレクト
          */
         L.debug("return");
-        return redirectTasks(task.getEstimatedStartTime());
+        return redirectTasks(user, task.getEstimatedStartTime());
     }
 
-    @RequestMapping(value = "/ui/tasks/changeDate", method = RequestMethod.POST)
-    public String changeDate(@Validated @ModelAttribute ChangeDateVO changeDateForm, BindingResult result, Model model) {
-        L.debug("changeDate: changeDateForm={}, model={}", changeDateForm, model);
+    @RequestMapping(value = "/ui/users/{userId}/tasks/changeDate", method = RequestMethod.POST)
+    public String changeDate(@PathVariable(name = "userId") String userId,
+        @Validated @ModelAttribute ChangeDateVO changeDateForm,
+        BindingResult result, Model model) {
+        L.debug("changeDate: userId={}, changeDateForm={}, model={}", userId, changeDateForm, model);
 
         /*
-         * 入力チェック
+         * 事前条件チェック
          */
+        // 権限チェック
+        User user = this.findUserByTwitter(userId);
+        if (user == null) {
+            return "redirect:/";
+        }
+
+        // 入力チェック
         L.debug("validate: hasErrors={}", result.hasErrors());
         if (result.hasErrors()) {
             L.debug("return");
-            return redirectTasks(null);
+            return redirectTasks(user, null);
         }
 
         /*
          * タスク一覧ページにリダイレクト
          */
-        return redirectTasks(changeDateForm.getTargetDate());
+        return redirectTasks(user, changeDateForm.getTargetDate());
     }
 
-    private String redirectTasks(Date date) {
+    private String redirectTasks(User user, Date date) {
         String query = "";
         if (date != null && !DateUtils.isSameDay(date, new Date())) {
             query = "?date=" + DateUtil.formatDate(date);
         }
 
-        String path = "redirect:/ui/tasks" + query;
+        String path = "redirect:/ui/users/" + user.getId() + "/tasks" + query;
         L.debug("path={}", path);
 
         return path;
+    }
+
+    private User findUserByTwitter(String userIdViaPath) {
+        L.debug("#findUserByTwitter: userIdViaPath={}", userIdViaPath);
+
+        // SNS連携できていない場合、nullを返す。
+        if (this.connectionRepository.findPrimaryConnection(Twitter.class) == null) {
+            L.warn("Twitter unconnect");
+            return null;
+        }
+
+        // SNS連携できているが未サインアップの場合、nullを返す。
+        User user = this.userService.findBySocialAccount(this.twitter);
+        if (user == null) {
+            L.warn("user not found");
+            return null;
+        }
+
+        // サインイン済みユーザーとパスのユーザーIDが異なる場合、例外をスローする。
+        if (!StringUtils.equals(user.getId().toString(), userIdViaPath)) {
+            throw new IllegalArgumentException("user.id not equal userId via path: user.id=" + user.getId() + ", userIdViaPath=" + userIdViaPath);
+        }
+
+        return user;
     }
 
 }

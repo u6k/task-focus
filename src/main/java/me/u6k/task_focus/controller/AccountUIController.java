@@ -1,6 +1,7 @@
 
 package me.u6k.task_focus.controller;
 
+import me.u6k.task_focus.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,9 @@ public class AccountUIController {
     @Autowired
     private ConnectionRepository connectionRepository;
 
+    @Autowired
+    private UserService userService;
+
     private static final Logger L = LoggerFactory.getLogger(AccountUIController.class);
 
     @RequestMapping(value = "/accounts/signup", method = RequestMethod.GET)
@@ -35,6 +39,9 @@ public class AccountUIController {
         } else {
             // SNS連携している場合、サインアップを行い、トップ画面にリダイレクト
             L.debug("twitter: id={}", this.twitter.userOperations().getProfileId());
+
+            this.userService.add(this.twitter);
+
             return "redirect:/";
         }
     }

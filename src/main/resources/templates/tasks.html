@@ -29,7 +29,7 @@ body {
             </thead>
             <tbody>
                 <tr th:each="task : ${availableTaskList}">
-                    <td><a href="/ui/tasks/xxxxx-xx-xx-xx-xxxx" th:text="${task.name}" th:href="@{'/ui/tasks/'+${task.id}}">テスト作業1</a></td>
+                    <td><a href="/ui/users/xxx/tasks/xxxxx-xx-xx-xx-xxxx" th:text="${task.name}" th:href="@{'/ui/users/'+${user.id}+'/tasks/'+${task.id}}">テスト作業1</a></td>
                     <td th:text="${task.estimatedStartTime} ? ${#dates.format(task.estimatedStartTime, 'HH:mm')} : ''">13:00</td>
                     <td th:text="${task.estimatedTime}">60</td>
                     <td th:text="${task.actualStartTime} ? ${#dates.format(task.actualStartTime, 'HH:mm')} : ''">13:00</td>
@@ -47,13 +47,13 @@ body {
             </thead>
             <tbody>
                 <tr th:each="task : ${finishedTaskList}" class="text-muted">
-                    <td><del><a href="/ui/tasks/xxxxx-xx-xx-xx-xxxx" th:text="${task.name}" th:href="@{'/ui/tasks/'+${task.id}}" class="text-muted">テスト作業1</a></del></td>
+                    <td><del><a href="/ui/users/xxx/tasks/xxxxx-xx-xx-xx-xxxx" th:text="${task.name}" th:href="@{'/ui/users/'+${user.id}+'/tasks/'+${task.id}}" class="text-muted">テスト作業1</a></del></td>
                     <td th:text="${task.actualStartTime} ? ${#dates.format(task.actualStartTime, 'HH:mm')} : ''">13:00</td>
                     <td th:text="${task.actualTime}">60</td>
                 </tr>
             </tbody>
         </table>
-        <form role="form" action="tasks.html" method="post" th:action="@{/ui/tasks/add}" th:object="${taskAddForm}" class="form-inline">
+        <form role="form" action="tasks.html" method="post" th:action="@{'/ui/users/'+${user.id}+'/tasks/add'}" th:object="${taskAddForm}" class="form-inline">
             <div class="form-group">
                 <label for="name" class="sr-only">追加する作業名</label><input type="text" class="form-control" id="name" name="name" placeholder="追加する作業名" th:field="*{name}"></input>
             </div>

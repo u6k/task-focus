@@ -57,12 +57,12 @@ body {
             <dt class="col-sm-2">&nbsp;</dt>
             <dd class="col-sm-10">
                 <p>
-                    <a href="/ui/tasks/xxxxx-xx-xx-xx-xxxx/update" th:href="@{'/ui/tasks/'+${task.id}+'/update'}" class="btn btn-success" role="button">Update</a>
+                    <a href="/ui/users/xxx/tasks/xxxxx-xx-xx-xx-xxxx/update" th:href="@{'/ui/users/'+${user.id}+'/tasks/'+${task.id}+'/update'}" class="btn btn-success" role="button">Update</a>
                 </p>
             </dd>
             <dt class="col-sm-2">&nbsp;</dt>
             <dd class="col-sm-10">
-                <form role="form" action="tasks.html" method="post" th:action="@{'/ui/tasks/'+${task.id}+'/remove'}" class="form-horizontal">
+                <form role="form" action="tasks.html" method="post" th:action="@{'/ui/users/'+${user.id}+'/tasks/'+${task.id}+'/remove'}" class="form-horizontal">
                     <button type="submit" class="btn btn-danger">Remove</button>
                 </form>
             </dd>

@@ -18,7 +18,7 @@ body {
     <div class="container-fluid">
         <h1 class="page-header">Update Task</h1>
         <div class="alert alert-danger" role="alert" th:if="${error}" th:text="${error}">エラー</div>
-        <form role="form" action="tasks.html" method="post" th:action="@{'/ui/tasks/'+${id}+'/update'}" th:object="${taskUpdateForm}" class="form-horizontal">
+        <form role="form" action="tasks.html" method="post" th:action="@{'/ui/users/'+${user.id}+'/tasks/'+${id}+'/update'}" th:object="${taskUpdateForm}" class="form-horizontal">
             <div class="form-group has-error" th:class="${#fields.hasErrors('date')}? 'form-group has-error' : 'form-group'">
                 <label for="date" class="col-sm-2">作業日</label>
                 <div class="col-sm-10">
