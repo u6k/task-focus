@@ -1,4 +1,4 @@
-FROM maven:3-jdk-8
+FROM openjdk:8-alpine
 LABEL maintainer="u6k.apps@gmail.com"
 
 WORKDIR /usr/local/src/task-focus
