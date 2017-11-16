@@ -1,8 +1,14 @@
 # Changelog
 
+## [0.6.0](https://github.com/u6k/task-focus/releases/tag/0.6.0) - 2017-11-16
+
+### Changed
+
+- [機能 #5902: 開発用Dockerイメージは必要として、やはりMaven Wrapperも用意しておきます](https://redmine.u6k.me/issues/5902)
+
 ## [0.5.0](https://github.com/u6k/task-focus/releases/tag/0.5.0) - 2017-11-13
 
-### Added
+### Changed
 
 - [機能 #5896: Maven Wrapperではなく開発用Dockerイメージに戻します](https://redmine.u6k.me/issues/5896)
 
