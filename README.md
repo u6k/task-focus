@@ -46,12 +46,18 @@ Dockerイメージを配布しているため、次のように実行するこ�
 $ docker run \
     -p 8080:8080 \
     -v ${HOME}/volumes/task-focus:/var/task-focus \
+    -e APP_TWITTER_CONSUMER_KEY=xxx \
+    -e APP_TWITTER_CONSUMER_SECRET=xxx \
     u6kapps/task-focus
 ```
 
 jarファイルを実行することもできます。
 
 ```
+$ export _JAVA_OPTIONS="-Duser.timezone=Asia/Tokyo -Duser.country=JP -Duser.language=ja"
+$ export APP_TWITTER_CONSUMER_KEY=xxx
+$ export APP_TWITTER_CONSUMER_SECRET=xxx
+$ export APP_DB_PATH=${HOME}/volumes/task-focus/db/task-focus
 $ java -jar task-focus-x.x.x.jar
 ```
 
@@ -119,11 +125,14 @@ Server:
 ```
 
 - Twitterアプリケーション登録を行い、Consumer KeyとConsumer Secretを取得
+
 - 環境変数
     - Maven Wrapperを使用する場合に設定
 
 ```
 $ export _JAVA_OPTIONS="-Duser.timezone=Asia/Tokyo -Duser.country=JP -Duser.language=ja"
+$ export APP_TWITTER_CONSUMER_KEY=xxx
+$ export APP_TWITTER_CONSUMER_SECRET=xxx
 ```
 
 ### コマンドなど
