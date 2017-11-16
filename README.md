@@ -26,6 +26,14 @@ ToDoリストやGTDはやるべきことを収集できますが、「今日や�
 - [Contribute](#contribute)
     - [前提条件](#前提条件)
     - [コマンドなど](#コマンドなど)
+        - [開発用Dockerイメージをビルド](#開発用dockerイメージをビルド)
+        - [Eclipseプロジェクトを作成](#eclipseプロジェクトを作成)
+        - [ユニット・テスト](#ユニット・テスト)
+        - [プロジェクト・レポートを出力](#プロジェクト・レポートを出力)
+        - [動作確認](#動作確認)
+        - [実行用Dockerイメージをビルド](#実行用dockerイメージをビルド)
+        - [実行](#実行)
+        - [E2Eテスト](#e2eテスト)
 - [License](#license)
 
 <!-- /TOC -->
@@ -111,16 +119,32 @@ Server:
 ```
 
 - Twitterアプリケーション登録を行い、Consumer KeyとConsumer Secretを取得
+- 環境変数
+    - Maven Wrapperを使用する場合に設定
+
+```
+$ export _JAVA_OPTIONS="-Duser.timezone=Asia/Tokyo -Duser.country=JP -Duser.language=ja"
+```
 
 ### コマンドなど
 
-開発用Dockerイメージをビルド:
+#### 開発用Dockerイメージをビルド
+
+__NOTE:__ Maven Wrapperがあるため、開発用Dockerイメージが無くても開発作業はできます。
 
 ```
 $ docker build -t task-focus-dev -f Dockerfile-dev .
 ```
 
-Eclipseプロジェクトを作成:
+#### Eclipseプロジェクトを作成
+
+Maven Wrapperを使用する場合:
+
+```
+$ ./mvnw eclipse:eclipse
+```
+
+開発用Dockerイメージを使用する場合:
 
 ```
 $ docker run \
@@ -128,21 +152,18 @@ $ docker run \
     -v $HOME/.m2:/root/.m2 \
     -v $(pwd):/usr/local/src/task-focus \
     task-focus-dev \
-        mvn eclipse:eclipse
+        ./mvnw eclipse:eclipse
 ```
 
-ユニット・テスト:
+#### ユニット・テスト
+
+Maven Wrapperを使用する場合:
 
 ```
-$ docker run \
-    --rm \
-    -v $HOME/.m2:/root/.m2 \
-    -v $(pwd):/usr/local/src/task-focus \
-    task-focus-dev \
-        mvn surefire-report:report
+$ ./mvnw surefire-report:report
 ```
 
-プロジェクト・レポートを出力:
+開発用Dockerイメージを使用する場合:
 
 ```
 $ docker run \
@@ -150,10 +171,37 @@ $ docker run \
     -v $HOME/.m2:/root/.m2 \
     -v $(pwd):/usr/local/src/task-focus \
     task-focus-dev \
-        mvn site
+        ./mvnw surefire-report:report
 ```
 
-動作確認:
+#### プロジェクト・レポートを出力
+
+Maven Wrapperを使用する場合:
+
+```
+$ ./mvnw site
+```
+
+開発用Dockerイメージを使用する場合:
+
+```
+$ docker run \
+    --rm \
+    -v $HOME/.m2:/root/.m2 \
+    -v $(pwd):/usr/local/src/task-focus \
+    task-focus-dev \
+        ./mvnw site
+```
+
+#### 動作確認
+
+Maven Wrapperを使用する場合:
+
+```
+$ ./mvnw spring-boot:run
+```
+
+開発用Dockerイメージを使用する場合:
 
 ```
 $ docker run \
@@ -164,17 +212,17 @@ $ docker run \
     -e APP_TWITTER_CONSUMER_KEY=xxx \
     -e APP_TWITTER_CONSUMER_SECRET=xxx \
     task-focus-dev \
-        mvn spring-boot:run
+        ./mvnw spring-boot:run
 ```
 
-実行用Dockerイメージをビルド:
+#### 実行用Dockerイメージをビルド
 
 ```
 # プロジェクト・レポートを出力した後に実行
 $ docker build -t task-focus .
 ```
 
-実行:
+#### 実行
 
 ```
 $ docker run \
@@ -185,7 +233,7 @@ $ docker run \
     task-focus
 ```
 
-E2Eテスト:
+#### E2Eテスト
 
 __TODO:__ E2Eテストは未実装です。
 
