@@ -12,7 +12,7 @@ before_install:
 
 script:
     - docker build -t task-focus-dev -f Dockerfile-dev .
-    - docker run --rm -v $HOME/.m2:/root/.m2 -v $(pwd):/usr/local/src/task-focus task-focus-dev mvn clean site
+    - docker run --rm -v $HOME/.m2:/root/.m2 -v $(pwd):/usr/local/src/task-focus task-focus-dev ./mvnw clean site
     - docker build -t u6kapps/task-focus .
 
 after_success:
